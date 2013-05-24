@@ -14,10 +14,13 @@ cvs co -r V00-02d -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/P
 #HISTO BASED
 cvs co -r v1-2-5 -d QuarkGluonTagger/EightTeV UserCode/tomc/QuarkGluonTagger/EightTeV
 
-cvs co -d amarini/VPlusJets UserCode/amarini/VPlusJets
+#cvs co -d amarini/VPlusJets UserCode/amarini/VPlusJets
 cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 
 addpkg  CommonTools/ParticleFlow V00-03-13  
 addpkg  RecoParticleFlow/PFProducer V15-01-11
+
+############################ GIT #######################
+mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-10
 
 scram b -j 4
