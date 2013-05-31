@@ -180,6 +180,9 @@ class PATZJetsExpress : public edm::EDAnalyzer {
         float isoFPRNeutral;
         float isoFPRCharged;
         float isoFPRPhoton;
+	float isoFPRRandomConeCharged;
+	float isoFPRRandomConeNeutral;
+	float isoFPRRandomConePhoton;
 
         enum photonParameters {  passconv, pfIsoCH, pfIsoNH, pfIsoP, pfCic03P, pfCic03N, pfCic04P, pfCic04N , pfCic03Cg, pfCic04Cg, pfCic03Cb, pfCic04Cb, sieie, sieip, etaw, phiw,  r9, lR, s4, e25, sceta, ESEff,
         	hcalTowerSumEtConeDR04,
@@ -450,6 +453,9 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float>* photonIsoFPRCharged_; //with FOOT PRINT REMOVAL FROM MP
       vector<float>* photonIsoFPRNeutral_;
       vector<float>* photonIsoFPRPhoton_;
+      vector<float>* photonIsoFPRRandomConeCharged_; //with FOOT PRINT REMOVAL FROM MP
+      vector<float>* photonIsoFPRRandomConeNeutral_;
+      vector<float>* photonIsoFPRRandomConePhoton_;
   
       vector<float> *jetPhotonDPhi_;
 //       vector<float> *photonPar_;
@@ -1679,10 +1685,14 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  VertexRef myVtxRef(vertices_, ivtx);
 	 
 	  //MP ISO
-	  SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup); 
+	  //SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup); 
+	  SuperClusterFootprintRemoval remover(iEvent,iSetup,edm::ParameterSet()); //V01-00
 	  float photonIsoFPRCharged = remover.PFIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRNeutral = remover.PFIsolation("neutral",it->superCluster());
 	  float photonIsoFPRPhoton = remover.PFIsolation("photon",it->superCluster());
+	  float photonIsoFPRRandomConeCharged = remover.RandomConeIsolation("charged",it->superCluster(),0);
+	  float photonIsoFPRRandomConeNeutral = remover.RandomConeIsolation("neutral",it->superCluster());
+	  float photonIsoFPRRandomConePhoton = remover.RandomConeIsolation("photon",it->superCluster());
 
 	  // chiara: ma va fatto cosi'? c'era gia'
 	  isolator.fGetIsolation((&*it),pfCandidates.product(), myVtxRef, vertices_);
@@ -1895,6 +1905,9 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  gamma.isoFPRCharged=photonIsoFPRCharged ;
 	  gamma.isoFPRNeutral=photonIsoFPRNeutral ;
 	  gamma.isoFPRPhoton=photonIsoFPRPhoton ;
+	  gamma.isoFPRRandomConeCharged=photonIsoFPRRandomConeCharged;
+	  gamma.isoFPRRandomConeNeutral=photonIsoFPRRandomConeNeutral;
+	  gamma.isoFPRRandomConePhoton=photonIsoFPRRandomConePhoton;
 
 	  // --- save FSR photon candidates and gamma+jets in seperate paths
 	  
@@ -2336,6 +2349,9 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	photonIsoFPRCharged_->push_back(myPhotons[gg].isoFPRCharged);
 	photonIsoFPRNeutral_->push_back(myPhotons[gg].isoFPRNeutral);
 	photonIsoFPRPhoton_->push_back(myPhotons[gg].isoFPRPhoton);
+	photonIsoFPRRandomConeCharged_->push_back(myPhotons[gg].isoFPRRandomConeCharged);
+	photonIsoFPRRandomConeNeutral_->push_back(myPhotons[gg].isoFPRRandomConeNeutral);
+	photonIsoFPRRandomConePhoton_->push_back(myPhotons[gg].isoFPRRandomConePhoton);
       }
 
 
@@ -2751,6 +2767,9 @@ void PATZJetsExpress::buildTree()
   photonIsoFPRCharged_ = new std::vector<float>();
   photonIsoFPRNeutral_ = new std::vector<float>();
   photonIsoFPRPhoton_ = new std::vector<float>();
+  photonIsoFPRRandomConeCharged_ = new std::vector<float>();
+  photonIsoFPRRandomConeNeutral_ = new std::vector<float>();
+  photonIsoFPRRandomConePhoton_ = new std::vector<float>();
 
   //  photonPar_         = new std::vector<float>();
 //  FSRphotonPar_      = new std::vector<float>();
@@ -2819,6 +2838,9 @@ void PATZJetsExpress::buildTree()
     myTree_->Branch("photonIsoFPRCharged",          "vector<float>"   ,&photonIsoFPRCharged_);
     myTree_->Branch("photonIsoFPRNeutral",          "vector<float>"   ,&photonIsoFPRNeutral_);
     myTree_->Branch("photonIsoFPRPhoton",          "vector<float>"   ,&photonIsoFPRPhoton_);
+    myTree_->Branch("photonIsoFPRRandomConeCharged",          "vector<float>"   ,&photonIsoFPRRandomConeCharged_);
+    myTree_->Branch("photonIsoFPRRandomConeNeutral",          "vector<float>"   ,&photonIsoFPRRandomConeNeutral_);
+    myTree_->Branch("photonIsoFPRRandomConePhoton",          "vector<float>"   ,&photonIsoFPRRandomConePhoton_);
     myTree_->Branch("photonBit","vector<int>",&photonBit_ );
   }
   // ---- trigger variables ---------------------------------------------
@@ -3031,6 +3053,9 @@ void PATZJetsExpress::clearTree()
   photonIsoFPRCharged_            ->clear();
   photonIsoFPRNeutral_            ->clear();
   photonIsoFPRPhoton_             ->clear();
+  photonIsoFPRRandomConeCharged_            ->clear();
+  photonIsoFPRRandomConeNeutral_            ->clear();
+  photonIsoFPRRandomConePhoton_             ->clear();
 
 
   isTriggered_       =    0; // please keep this 0

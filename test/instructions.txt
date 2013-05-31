@@ -4,17 +4,40 @@ cmsrel CMSSW_5_3_6
 cd CMSSW_5_3_6/src
 cmsenv
 
-#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval
-cvs co -r V00-02d -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
+#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
+Random cone
+cvs co -r V01-00 -d PFIsolation/SuperClusterFootprintRemoval UserCode/peruzzi/PFIsolation/SuperClusterFootprintRemoval
 	#cvs co -d pandolf/QuarkGluonTagger UserCode/pandolf/QuarkGluonTagger
 	#2012 TAGGER
 	#cvs co -r am2013-02-12 -d QuarkGluonAnalysis/QuarkGluonTagger2012 UserCode/amarini/QuarkGluonTagger2012
-#FIT BASED
-#cvs co -r v1-1-3 -d QuarkGluonTagger/EightTeV UserCode/tomc/QuarkGluonTagger/EightTeV
-#HISTO BASED
-#cvs co -r v1-2-5 -d QuarkGluonTagger/EightTeV UserCode/tomc/QuarkGluonTagger/EightTeV
 
-#cvs co -d amarini/VPlusJets UserCode/amarini/VPlusJets
+#patch to make configurable the jet collection
+#-----------------------------------------------------------------#
+patch -p1 -d PFIsolation <EOF
+diff -u -r --exclude CVS
+PFIsoOrigin/SuperClusterFootprintRemoval/src/SuperClusterFootprintRemoval.cc
+PFIsolation/SuperClusterFootprintRemoval/src/SuperClusterFootprintRemoval.cc
+---
+PFIsoOrigin/SuperClusterFootprintRemoval/src/SuperClusterFootprintRemoval.cc
+2013-05-31 10:50:56.000000000 +0200
++++
+PFIsolation/SuperClusterFootprintRemoval/src/SuperClusterFootprintRemoval.cc
+2013-05-31 10:53:35.000000000 +0200
+@@ -56,7 +56,9 @@
+   iEvent.getByLabel("photons", photonHandle);
+ 
+   //Jets
+-  iEvent.getByLabel("ak5PFJets", jetHandle);
++  edm::InputTag fJets =
+iConfig.getUntrackedParameter<edm::InputTag>("tag_Jets_forSCremoval",edm::InputTag("ak5PFJets"));
++  iEvent.getByLabel(fJets, jetHandle);
++       // iEvent.getByLabel("ak5PFJets", jetHandle);
+ 
+   //Muons
+   iEvent.getByLabel("muons", muonHandle);
+EOF
+#-----------------------------------------------------------------#
+
 cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 
 addpkg  CommonTools/ParticleFlow V00-03-13  
@@ -25,3 +48,12 @@ mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd V
 git clone git@github.com:amarini/QuarkGluonTagger.git ; cd QuarkGluonTagger ; git checkout v1-2-5 ; cd ..
 
 scram b -j 4
+
+
+
+########################### OLD ##########################
+	#FIT BASED
+	#cvs co -r v1-1-3 -d QuarkGluonTagger/EightTeV UserCode/tomc/QuarkGluonTagger/EightTeV
+	#HISTO BASED
+	#cvs co -r v1-2-5 -d QuarkGluonTagger/EightTeV UserCode/tomc/QuarkGluonTagger/EightTeV
+	#cvs co -d amarini/VPlusJets UserCode/amarini/VPlusJets
