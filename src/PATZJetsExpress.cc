@@ -3252,45 +3252,6 @@ double PATZJetsExpress::getEffectiveAreaForMuons(const double& eta) const {
 	else                                    return 9999;
 }
 
-std::vector<float> PATZJetsExpress::getDataMCResFactor(const double& eta) const {
-
-	std::vector<float> result(3,0);
-	//0: factor default
-	//1: factor up
-	//2: factor down
-	float abseta = fabs(eta);
-	if(abseta<=0.5){
-		result[0]=1.052;
-		result[1]=1.052+sqrt(pow(0.012,2)+pow(0.062,2));
-		result[2]=1.052-sqrt(pow(0.012,2)+pow(0.061,2));
-	}
-	else if (abseta>0.5 && abseta<=1.1){
-		result[0]=1.057;
-		result[1]=1.057+sqrt(pow(0.012,2)+pow(0.056,2));
-		result[2]=1.057-sqrt(pow(0.012,2)+pow(0.055,2));
-	}
-	else if (abseta>1.1 && abseta<=1.7){
-		result[0]=1.096;
-		result[1]=1.096+sqrt(pow(0.017,2)+pow(0.063,2));
-		result[2]=1.096-sqrt(pow(0.017,2)+pow(0.062,2));
-	}
-	else if (abseta>1.7 && abseta<=2.3){
-		result[0]=1.134;
-		result[1]=1.134+sqrt(pow(0.035,2)+pow(0.087,2));
-		result[2]=1.134-sqrt(pow(0.035,2)+pow(0.085,2));
-	}
-	else if (abseta>2.3 && abseta<=5.0){
-		result[0]=1.288;
-		result[1]=1.288+sqrt(pow(0.127,2)+pow(0.155,2));
-		result[2]=1.288-sqrt(pow(0.127,2)+pow(0.153,2));
-	}
-	else{
-		result[0]=1.;
-		result[1]=1.;
-		result[2]=1.;
-	}
-	return result;
-}
 
 std::vector<float> PATZJetsExpress::getDataMCResFactor(const double& eta) const {
   std::vector<float> result(3,0);
