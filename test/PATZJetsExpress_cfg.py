@@ -24,9 +24,11 @@ from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 if(isMC):
-	process.GlobalTag.globaltag = 'START53_V18::All'    # MC 53Y release
+	process.GlobalTag.globaltag = 'START53_V22::All'    # MC 53Y release < CMSSW_5_3_8_patch3
 else:
-	process.GlobalTag.globaltag = 'FT_53_V6C_AN3::All'  # 2012AB - July13 2012 - re-reco of 2012AB in 53X
+	process.GlobalTag.globaltag = 'FT_53_V21_AN4::All'  # Winter13 2012 A, B, C, D datasets re-reco with CMSSW_5_3_7_patch6 
+	#-----------------2012 A, B, C, D datasets re-reco + prompt with CMSSW > 5_3_2 (official recommendation) 
+	#process.GlobalTag.globaltag = 'FT_53_V6C_AN3::All'  # 2012AB - July13 2012 - re-reco of 2012AB in 53X
 	#process.GlobalTag.globaltag = 'FT_53_V6C_AN3::All' # 2012A - Aug06 2012 - re-reco of run-range 190782-190949 
 	#process.GlobalTag.globaltag = 'FT53_V10A_AN3::All' # 2012C-v1 - Aug24 2012 - re-reco of 2012C (v1)
 	#process.GlobalTag.globaltag = 'GR_P_V42_AN3::All'  # 2012C-v2 - prompt reco for 2012C_v2 - prompt reco
@@ -55,14 +57,16 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 # ---- load geometry package --------------------------------------------
 #process.load("Configuration.StandardSequences.Geometry_cff")
 # ---- maximum number of events to run over -----------------------------
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(1))
 # ---- define the source ------------------------------------------------
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-'file:/scratch0/webermat/DYJets_MadGraph_START_53_V7A.root'
-#'file:/scratch0/webermat/QCD_HT1000toInf_8TeV_madgraph_Summer12.root'	
+'file:/data/sandro/Analisi/GammaJets/CMSSW_5_3_6xxx2013_06_03_TriMatch/CMSSW_5_3_6/src/amarini/VPlusJets/test/input_DYJetsToLL_M-50_Summer12.root'
+#'file:/data/sandro/Analisi/GammaJets/CMSSW_5_3_6xxx2013_06_03_TriMatch/CMSSW_5_3_6/src/amarini/VPlusJets/test/input_Photon_Run2012A-22Jan2013-v1_AOD.root'
+#'file:/scratch0/webermat/DYJets_MadGraph_START_53_V7A.root'
+#'file:/scratch0/webermat/QCD_HT1000toInf_8TeV_madgraph_Summer12.root'
 #'file:pickevents.root'
 #'file:/scratch0/webermat/GJets_HT_200To400_8TeV_madgraph.root'
 #'/store/relval/CMSSW_5_3_6-START53_V14/RelValProdTTbar/AODSIM/v2/00000/76ED0FA6-1E2A-E211-B8F1-001A92971B72.root'
@@ -78,14 +82,14 @@ process.source = cms.Source("PoolSource",
 #            jets     = cms.InputTag('jetExtender','extendedPatJets'),
 #            rho      = cms.InputTag('kt6PFJetsForIso','rho'),
 #            jec      = cms.string('ak5PFL1FastL2L3'),
-#	    isPatJet = cms.bool(True)
+#            isPatJet = cms.bool(True)
 #  )
 
 process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff') 
 process.QGTagger.srcJets = cms.InputTag('jetExtender','extendedPatJets')
 #process.QGTagger.jecService     = cms.string('') #useless for pat or corrected jets
 process.QGTagger.dataDir        = cms.untracked.string("QuarkGluonTagger/EightTeV/data/")
-process.QGTagger.isPatJet	= cms.untracked.bool(True)
+process.QGTagger.isPatJet = cms.untracked.bool(True)
 #process.qglAK5PF = cms.EDProducer("QuarkGluonTagger",
 #  jets           = cms.InputTag('jetExtender','extendedPatJets'),
 #  srcRho         = cms.InputTag('kt6PFJets','rho'),
@@ -173,7 +177,7 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
     jets            = cms.InputTag('jetExtender','extendedPatJets'),
     srcRho          = cms.InputTag('kt6PFJets','rho'),
     srcRho25        = cms.InputTag('kt6PFJetsCentralNeutral','rho'),
-    srcRhoQG        = cms.InputTag('kt6PFJetsIsoQG','rho'),				  
+    srcRhoQG        = cms.InputTag('kt6PFJetsIsoQG','rho'),
     pfIsoValEleCH03 = cms.InputTag('elPFIsoValueCharged03PFIdPFIso'),
     pfIsoValEleNH03 = cms.InputTag('elPFIsoValueNeutral03PFIdPFIso'),
     pfIsoValEleG03  = cms.InputTag('elPFIsoValueGamma03PFIdPFIso'),                                    
@@ -224,15 +228,15 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
                                   'HLT_Photon20_CaloIdVL_IsoL_v',
                                   'HLT_Photon30_v',
                                   'HLT_Photon30_CaloIdVL_v',
-				  'HLT_Photon30_CaloIdVL_IsoL_v',
-				  'HLT_Photon50_CaloIdVL_v',
+                                  'HLT_Photon30_CaloIdVL_IsoL_v',
+                                  'HLT_Photon50_CaloIdVL_v',
                                   'HLT_Photon50_CaloIdVL_IsoL_v',
                                   'HLT_Photon75_CaloIdVL_v',
-				  'HLT_Photon75_CaloIdVL_IsoL_v',
+                                  'HLT_Photon75_CaloIdVL_IsoL_v',
                                   'HLT_Photon90_CaloIdVL_v',
                                   'HLT_Photon90_CaloIdVL_IsoL_v',
                                   'HLT_Photon135_v',
-		                  'HLT_Photon150_v',
+                                  'HLT_Photon150_v',
                                   'HLT_Mu15_v',
                                   'HLT_Mu24_v',
                                   'HLT_Mu30_v',
@@ -273,15 +277,15 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
                                   'HLT_Photon20_CaloIdVL_IsoL_v',
                                   'HLT_Photon30_v',
                                   'HLT_Photon30_CaloIdVL_v',
-			          'HLT_Photon30_CaloIdVL_IsoL_v',
-			          'HLT_Photon50_CaloIdVL_v',
+                                  'HLT_Photon30_CaloIdVL_IsoL_v',
+                                  'HLT_Photon50_CaloIdVL_v',
                                   'HLT_Photon50_CaloIdVL_IsoL_v',
                                   'HLT_Photon75_CaloIdVL_v',
-				  'HLT_Photon75_CaloIdVL_IsoL_v',
+                                  'HLT_Photon75_CaloIdVL_IsoL_v',
                                   'HLT_Photon90_CaloIdVL_v',
                                   'HLT_Photon90_CaloIdVL_IsoL_v',
                                   'HLT_Photon135_v',
-				  'HLT_Photon150_v'),
+                                  'HLT_Photon150_v'),
     triggerFamily5  = cms.vstring('HLT_Mu15_v',
                                   'HLT_Mu24_v',
                                   'HLT_Mu30_v',
@@ -310,11 +314,11 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
                                   'HLT_Mu17_Mu8_v',
                                   'HLT_Ele27_WP80_v',
                                   'HLT_Photon30_CaloIdVL_v',
-				  'HLT_Photon30_CaloIdVL_IsoL_v',
-				  'HLT_Photon50_CaloIdVL_v',
+                                  'HLT_Photon30_CaloIdVL_IsoL_v',
+                                  'HLT_Photon50_CaloIdVL_v',
                                   'HLT_Photon50_CaloIdVL_IsoL_v',
                                   'HLT_Photon75_CaloIdVL_v',
-				  'HLT_Photon75_CaloIdVL_IsoL_v',
+                                  'HLT_Photon75_CaloIdVL_IsoL_v',
                                   'HLT_Photon90_CaloIdVL_v',
                                   'HLT_Photon90_CaloIdVL_IsoL_v',
                                   'HLT_Mu8_Ele8_CaloIdT_TrkIdVL_Ele8_CaloIdL_TrkIdVL_v',
@@ -351,15 +355,15 @@ process.hltFilter = cms.EDFilter('HLTHighLevel',
                                      'HLT_Photon20_CaloIdVL_IsoL_v*',
                                      'HLT_Photon30_v*',
                                      'HLT_Photon30_CaloIdVL_v*',
-				     'HLT_Photon30_CaloIdVL_IsoL_v*',
-				     'HLT_Photon50_CaloIdVL_v*',
+                                     'HLT_Photon30_CaloIdVL_IsoL_v*',
+                                     'HLT_Photon50_CaloIdVL_v*',
                                      'HLT_Photon50_CaloIdVL_IsoL_v*',
                                      'HLT_Photon75_CaloIdVL_v*',
-				     'HLT_Photon75_CaloIdVL_IsoL_v*',
+                                     'HLT_Photon75_CaloIdVL_IsoL_v*',
                                      'HLT_Photon90_CaloIdVL_v*',
                                      'HLT_Photon90_CaloIdVL_IsoL_v*',
                                      'HLT_Photon135_v*',
-				     'HLT_Photon150_v*', 
+                                     'HLT_Photon150_v*', 
                                      'HLT_Mu15_v2*',
                                      'HLT_Mu24_v*',
                                      'HLT_Mu30_v*',

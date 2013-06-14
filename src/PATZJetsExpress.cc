@@ -400,7 +400,7 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float> *lepR9orChi2ndof_;
       // ---- lepton Trigger Matching -----------------------------------
       vector<int> *TriMatchF1Path_doubleMu_, *TriMatchF2Path_doubleEle_, *TriMatchF3Path_MuEle_muon_,
-      		*TriMatchF3Path_MuEle_electron_, *TriMatchF5Path_singleMu_, *TriMatchF6Path_singleEle_;
+                  *TriMatchF3Path_MuEle_electron_, *TriMatchF5Path_singleMu_, *TriMatchF6Path_singleEle_;
       // ---- lepton properties ----------------------------------------- 
       vector<int>   *lepChId_,*lepId_,*lepChIdGEN_,*lepMatchedGEN_;
       vector<float> *lepPFIsoUnc_,*lepPFIsoDBCor_,*lepPFIsoRhoCor_,*lepMatchedDRGEN_;
@@ -1443,51 +1443,51 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 				}
       }
 
-	MuisTriMatchF1Path = 0;
-	for(unsigned itrig1=0;itrig1<triggerFamily1_.size();itrig1++) {
-	if (PAT_muonF1.triggerObjectMatchesByPath(triggerFamily1_[itrig1]+"*").size()==1) {
-	MuisTriMatchF1Path |= 1<<itrig1;
-	// if itrig1 = 0  -> 0001 -> MuisTriMatchF1Path = 1    -> HLT_DoubleMu7_v
-	// if itrig1 = 1  -> 0010 -> MuisTriMatchF1Path = 2    -> HLT_Mu13_Mu8_v
-	// if itrig1 = 2  -> 0100 -> MuisTriMatchF1Path = 4    -> HLT_Mu17_Mu8_v
-	// if itrig1 = 3  -> 1000 -> MuisTriMatchF1Path = 8    -> HLT_Mu17_TkMu8_v
-	}
-	}
+	    MuisTriMatchF1Path = 0;
+	    for(unsigned itrig1=0;itrig1<triggerFamily1_.size();itrig1++) {
+	    	if (PAT_muonF1.triggerObjectMatchesByPath(triggerFamily1_[itrig1]+"*").size()==1) {
+      		MuisTriMatchF1Path |= 1<<itrig1;
+      		// if itrig1 = 0  -> 0001 -> MuisTriMatchF1Path = 1    -> HLT_DoubleMu7_v
+	      	// if itrig1 = 1  -> 0010 -> MuisTriMatchF1Path = 2    -> HLT_Mu13_Mu8_v
+	    		// if itrig1 = 2  -> 0100 -> MuisTriMatchF1Path = 4    -> HLT_Mu17_Mu8_v
+	    		// if itrig1 = 3  -> 1000 -> MuisTriMatchF1Path = 8    -> HLT_Mu17_TkMu8_v
+	   		}
+	    }
 	
-	MuisTriMatchF3Path = 0;
-	for(unsigned itrig3mu=0;itrig3mu<triggerFamily3_.size();itrig3mu++) {
-	if (PAT_muonF3.triggerObjectMatchesByPath(triggerFamily3_[itrig3mu]+"*").size()==1) {
-	MuisTriMatchF3Path |= 1<<itrig3mu;
-	// if itrig3mu = 0  -> 000000000001 -> MuisTriMatchF3Path = 1    -> HLT_Mu17_Ele8_CaloIdL_v'
-	// if itrig3mu = 1  -> 000000000010 -> MuisTriMatchF3Path = 2    -> HLT_Mu8_Ele17_CaloIdL_v'
-	// if itrig3mu = 2  -> 000000000100 -> MuisTriMatchF3Path = 4    -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v
-	// if itrig3mu = 3  -> 000000001000 -> MuisTriMatchF3Path = 8    -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v
-	// if itrig3mu = 4  -> 000000010000 -> MuisTriMatchF3Path = 16   -> HLT_DoubleMu5_Ele8_CaloIdT_TrkIdVL_v
-	// if itrig3mu = 5  -> 000000100000 -> MuisTriMatchF3Path = 32   -> HLT_DoubleMu8_Ele8_CaloIdT_TrkIdVL_v
-	// if itrig3mu = 6  -> 000001000000 -> MuisTriMatchF3Path = 64   -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
-	// if itrig3mu = 7  -> 000010000000 -> MuisTriMatchF3Path = 128  -> HLT_Mu30_Ele30_CaloIdL_v
-	// if itrig3mu = 8  -> 000100000000 -> MuisTriMatchF3Path = 256  -> HLT_Mu7_Ele7_CaloIdT_CaloIsoVL_v
-	// if itrig3mu = 9  -> 001000000000 -> MuisTriMatchF3Path = 512  -> HLT_Mu8_DoubleEle8_CaloIdT_TrkIdVL_v
-	// if itrig3mu = 10 -> 010000000000 -> MuisTriMatchF3Path = 1024 -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
-	// if itrig3mu = 11 -> 100000000000 -> MuisTriMatchF3Path = 2048 -> HLT_Mu8_Ele8_CaloIdT_TrkIdVL_Ele8_CaloIdL_TrkIdVL_v
-	}
-	}
+	    MuisTriMatchF3Path = 0;
+	    for(unsigned itrig3mu=0;itrig3mu<triggerFamily3_.size();itrig3mu++) {
+	    	if (PAT_muonF3.triggerObjectMatchesByPath(triggerFamily3_[itrig3mu]+"*").size()==1) {
+	    		MuisTriMatchF3Path |= 1<<itrig3mu;
+	    		// if itrig3mu = 0  -> 000000000001 -> MuisTriMatchF3Path = 1    -> HLT_Mu17_Ele8_CaloIdL_v'
+	    		// if itrig3mu = 1  -> 000000000010 -> MuisTriMatchF3Path = 2    -> HLT_Mu8_Ele17_CaloIdL_v'
+	    		// if itrig3mu = 2  -> 000000000100 -> MuisTriMatchF3Path = 4    -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v
+	    		// if itrig3mu = 3  -> 000000001000 -> MuisTriMatchF3Path = 8    -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v
+	    		// if itrig3mu = 4  -> 000000010000 -> MuisTriMatchF3Path = 16   -> HLT_DoubleMu5_Ele8_CaloIdT_TrkIdVL_v
+	    		// if itrig3mu = 5  -> 000000100000 -> MuisTriMatchF3Path = 32   -> HLT_DoubleMu8_Ele8_CaloIdT_TrkIdVL_v
+	    		// if itrig3mu = 6  -> 000001000000 -> MuisTriMatchF3Path = 64   -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+	    		// if itrig3mu = 7  -> 000010000000 -> MuisTriMatchF3Path = 128  -> HLT_Mu30_Ele30_CaloIdL_v
+	    		// if itrig3mu = 8  -> 000100000000 -> MuisTriMatchF3Path = 256  -> HLT_Mu7_Ele7_CaloIdT_CaloIsoVL_v
+	    		// if itrig3mu = 9  -> 001000000000 -> MuisTriMatchF3Path = 512  -> HLT_Mu8_DoubleEle8_CaloIdT_TrkIdVL_v
+	    		// if itrig3mu = 10 -> 010000000000 -> MuisTriMatchF3Path = 1024 -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+	    		// if itrig3mu = 11 -> 100000000000 -> MuisTriMatchF3Path = 2048 -> HLT_Mu8_Ele8_CaloIdT_TrkIdVL_Ele8_CaloIdL_TrkIdVL_v
+	    	}
+	    }
 	
-	MuisTriMatchF5Path = 0;
-	for(unsigned itrig5=0;itrig5<triggerFamily5_.size();itrig5++) {
-	if (PAT_muonF5.triggerObjectMatchesByPath(triggerFamily5_[itrig5]+"*").size()==1) {
-	MuisTriMatchF5Path |= 1<<itrig5;
-	// if itrig5 = 0  -> 000000001 -> MuisTriMatchF5Path = 1    -> HLT_Mu15_v
-	// if itrig5 = 1  -> 000000010 -> MuisTriMatchF5Path = 2    -> HLT_Mu24_v
-	// if itrig5 = 2  -> 000000100 -> MuisTriMatchF5Path = 4    -> HLT_Mu30_v
-	// if itrig5 = 3  -> 000001000 -> MuisTriMatchF5Path = 8    -> HLT_Mu40_v
-	// if itrig5 = 4  -> 000010000 -> MuisTriMatchF5Path = 16   -> HLT_Mu40_eta2p1_v
-	// if itrig5 = 5  -> 000100000 -> MuisTriMatchF5Path = 32   -> HLT_IsoMu17_v
-	// if itrig5 = 6  -> 001000000 -> MuisTriMatchF5Path = 64   -> HLT_IsoMu20_v
-	// if itrig5 = 7  -> 010000000 -> MuisTriMatchF5Path = 128  -> HLT_IsoMu24_v
-	// if itrig5 = 8  -> 100000000 -> MuisTriMatchF5Path = 256  -> HLT_IsoMu24_eta2p1_v                                  
-	}
-	}
+	    MuisTriMatchF5Path = 0;
+	    for(unsigned itrig5=0;itrig5<triggerFamily5_.size();itrig5++) {
+	    	if (PAT_muonF5.triggerObjectMatchesByPath(triggerFamily5_[itrig5]+"*").size()==1) {
+	    		MuisTriMatchF5Path |= 1<<itrig5;
+	    		// if itrig5 = 0  -> 000000001 -> MuisTriMatchF5Path = 1    -> HLT_Mu15_v
+	    		// if itrig5 = 1  -> 000000010 -> MuisTriMatchF5Path = 2    -> HLT_Mu24_v
+	    		// if itrig5 = 2  -> 000000100 -> MuisTriMatchF5Path = 4    -> HLT_Mu30_v
+	    		// if itrig5 = 3  -> 000001000 -> MuisTriMatchF5Path = 8    -> HLT_Mu40_v
+	    		// if itrig5 = 4  -> 000010000 -> MuisTriMatchF5Path = 16   -> HLT_Mu40_eta2p1_v
+	    		// if itrig5 = 5  -> 000100000 -> MuisTriMatchF5Path = 32   -> HLT_IsoMu17_v
+	    		// if itrig5 = 6  -> 001000000 -> MuisTriMatchF5Path = 64   -> HLT_IsoMu20_v
+	    		// if itrig5 = 7  -> 010000000 -> MuisTriMatchF5Path = 128  -> HLT_IsoMu24_v
+	    		// if itrig5 = 8  -> 100000000 -> MuisTriMatchF5Path = 256  -> HLT_IsoMu24_eta2p1_v                                  
+	    	}
+	    }
 
       
       PARTICLE aLepton;
@@ -1601,43 +1601,43 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       
       EleisTriMatchF2Path = 0;
       for(unsigned itrig2=0;itrig2<triggerFamily2_.size();itrig2++) {
-      if (PAT_electronF2.triggerObjectMatchesByPath(triggerFamily2_[itrig2]+"*").size()==1) {
-      EleisTriMatchF2Path |= 1<<itrig2;
-      // if itrig2 = 0  -> 01 -> EleisTriMatchF2Path = 1    -> HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
-      // if itrig2 = 1  -> 10 -> EleisTriMatchF2Path = 2    -> HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
-      }
+      	if (PAT_electronF2.triggerObjectMatchesByPath(triggerFamily2_[itrig2]+"*").size()==1) {
+      		EleisTriMatchF2Path |= 1<<itrig2;
+      		// if itrig2 = 0  -> 01 -> EleisTriMatchF2Path = 1    -> HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
+      		// if itrig2 = 1  -> 10 -> EleisTriMatchF2Path = 2    -> HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+      	}
       }
       
       EleisTriMatchF3Path = 0;
       for(unsigned itrig3ele=0;itrig3ele<triggerFamily3_.size();itrig3ele++) {
-      if (PAT_electronF3.triggerObjectMatchesByPath(triggerFamily3_[itrig3ele]+"*").size()==1) {
-      EleisTriMatchF3Path |= 1<<itrig3ele;
-      // if itrig3ele = 0  -> 000000000001 -> EleisTriMatchF3Path = 1    -> HLT_Mu17_Ele8_CaloIdL_v'
-      // if itrig3ele = 1  -> 000000000010 -> EleisTriMatchF3Path = 2    -> HLT_Mu8_Ele17_CaloIdL_v'
-      // if itrig3ele = 2  -> 000000000100 -> EleisTriMatchF3Path = 4    -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v
-      // if itrig3ele = 3  -> 000000001000 -> EleisTriMatchF3Path = 8    -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v
-      // if itrig3ele = 4  -> 000000010000 -> EleisTriMatchF3Path = 16   -> HLT_DoubleMu5_Ele8_CaloIdT_TrkIdVL_v
-      // if itrig3ele = 5  -> 000000100000 -> EleisTriMatchF3Path = 32   -> HLT_DoubleMu8_Ele8_CaloIdT_TrkIdVL_v
-      // if itrig3ele = 6  -> 000001000000 -> EleisTriMatchF3Path = 64   -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
-      // if itrig3ele = 7  -> 000010000000 -> EleisTriMatchF3Path = 128  -> HLT_Mu30_Ele30_CaloIdL_v
-      // if itrig3ele = 8  -> 000100000000 -> EleisTriMatchF3Path = 256  -> HLT_Mu7_Ele7_CaloIdT_CaloIsoVL_v
-      // if itrig3ele = 9  -> 001000000000 -> EleisTriMatchF3Path = 512  -> HLT_Mu8_DoubleEle8_CaloIdT_TrkIdVL_v
-      // if itrig3ele = 10 -> 010000000000 -> EleisTriMatchF3Path = 1024 -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
-      // if itrig3ele = 11 -> 100000000000 -> EleisTriMatchF3Path = 2048 -> HLT_Mu8_Ele8_CaloIdT_TrkIdVL_Ele8_CaloIdL_TrkIdVL_v
-      }
+      	if (PAT_electronF3.triggerObjectMatchesByPath(triggerFamily3_[itrig3ele]+"*").size()==1) {
+      		EleisTriMatchF3Path |= 1<<itrig3ele;
+      		// if itrig3ele = 0  -> 000000000001 -> EleisTriMatchF3Path = 1    -> HLT_Mu17_Ele8_CaloIdL_v'
+      		// if itrig3ele = 1  -> 000000000010 -> EleisTriMatchF3Path = 2    -> HLT_Mu8_Ele17_CaloIdL_v'
+      		// if itrig3ele = 2  -> 000000000100 -> EleisTriMatchF3Path = 4    -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v
+      		// if itrig3ele = 3  -> 000000001000 -> EleisTriMatchF3Path = 8    -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v
+      		// if itrig3ele = 4  -> 000000010000 -> EleisTriMatchF3Path = 16   -> HLT_DoubleMu5_Ele8_CaloIdT_TrkIdVL_v
+      		// if itrig3ele = 5  -> 000000100000 -> EleisTriMatchF3Path = 32   -> HLT_DoubleMu8_Ele8_CaloIdT_TrkIdVL_v
+      		// if itrig3ele = 6  -> 000001000000 -> EleisTriMatchF3Path = 64   -> HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+      		// if itrig3ele = 7  -> 000010000000 -> EleisTriMatchF3Path = 128  -> HLT_Mu30_Ele30_CaloIdL_v
+      		// if itrig3ele = 8  -> 000100000000 -> EleisTriMatchF3Path = 256  -> HLT_Mu7_Ele7_CaloIdT_CaloIsoVL_v
+      		// if itrig3ele = 9  -> 001000000000 -> EleisTriMatchF3Path = 512  -> HLT_Mu8_DoubleEle8_CaloIdT_TrkIdVL_v
+      		// if itrig3ele = 10 -> 010000000000 -> EleisTriMatchF3Path = 1024 -> HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v
+      		// if itrig3ele = 11 -> 100000000000 -> EleisTriMatchF3Path = 2048 -> HLT_Mu8_Ele8_CaloIdT_TrkIdVL_Ele8_CaloIdL_TrkIdVL_v
+      	}
       }
       
       EleisTriMatchF6Path = 0;
       for(unsigned itrig6=0;itrig6<triggerFamily6_.size();itrig6++) {
-      if (PAT_electronF6.triggerObjectMatchesByPath(triggerFamily6_[itrig6]+"*").size()==1) {
-      EleisTriMatchF6Path |= 1<<itrig6;
-      // if itrig6 = 0  -> 000001 -> EleisTriMatchF6Path = 1    -> HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v
-      // if itrig6 = 1  -> 000010 -> EleisTriMatchF6Path = 2    -> HLT_Ele32_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v
-      // if itrig6 = 2  -> 000100 -> EleisTriMatchF6Path = 4    -> HLT_Ele52_CaloIdVT_TrkIdT_v
-      // if itrig6 = 3  -> 001000 -> EleisTriMatchF6Path = 8    -> HLT_Ele65_CaloIdVT_TrkIdT_v
-      // if itrig6 = 4  -> 010000 -> EleisTriMatchF6Path = 16   -> HLT_Ele80_CaloIdVT_TrkIdT_v
-      // if itrig6 = 5  -> 100000 -> EleisTriMatchF6Path = 32   -> HLT_Ele27_WP80_v
-      }
+      	if (PAT_electronF6.triggerObjectMatchesByPath(triggerFamily6_[itrig6]+"*").size()==1) {
+      		EleisTriMatchF6Path |= 1<<itrig6;
+      		// if itrig6 = 0  -> 000001 -> EleisTriMatchF6Path = 1    -> HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v
+      		// if itrig6 = 1  -> 000010 -> EleisTriMatchF6Path = 2    -> HLT_Ele32_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v
+      		// if itrig6 = 2  -> 000100 -> EleisTriMatchF6Path = 4    -> HLT_Ele52_CaloIdVT_TrkIdT_v
+      		// if itrig6 = 3  -> 001000 -> EleisTriMatchF6Path = 8    -> HLT_Ele65_CaloIdVT_TrkIdT_v
+      		// if itrig6 = 4  -> 010000 -> EleisTriMatchF6Path = 16   -> HLT_Ele80_CaloIdVT_TrkIdT_v
+      		// if itrig6 = 5  -> 100000 -> EleisTriMatchF6Path = 32   -> HLT_Ele27_WP80_v
+      	}
       }
 
       PARTICLE aLepton;
@@ -1699,7 +1699,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	EcalClusterLazyTools lazyTools(iEvent, iSetup, edm::InputTag("reducedEcalRecHitsEB"),
 				       edm::InputTag("reducedEcalRecHitsEE"));
 	int ipho = 0;
-        int PhoisTriMatchF4Path = 0;
+	int PhoisTriMatchF4Path = 0;
 	for(reco::PhotonCollection::const_iterator it = photons_->begin();it != photons_->end(); it++) {
 	  
 	  //for low pt photons we check isolation in order to reduce rate of saved events
@@ -1961,23 +1961,23 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  
      PhoisTriMatchF4Path = 0;
      for(unsigned itrig4=0;itrig4<triggerFamily4_.size();itrig4++) {
-     if (PAT_photon.triggerObjectMatchesByPath(triggerFamily4_[itrig4]+"*").size()==1) {
-     PhoisTriMatchF4Path |= 1<<itrig4;
-     // if itrig4 = 0  -> 00000000000001 -> PhoisTriMatchF4Path = 1    -> HLT_Photon20_CaloIdVL_v
-     // if itrig4 = 1  -> 00000000000010 -> PhoisTriMatchF4Path = 2    -> HLT_Photon20_CaloIdVL_IsoL_v
-     // if itrig4 = 2  -> 00000000000100 -> PhoisTriMatchF4Path = 4    -> HLT_Photon30_v
-     // if itrig4 = 3  -> 00000000001000 -> PhoisTriMatchF4Path = 8    -> HLT_Photon30_CaloIdVL_v
-     // if itrig4 = 4  -> 00000000010000 -> PhoisTriMatchF4Path = 16   -> HLT_Photon30_CaloIdVL_IsoL_v
-     // if itrig4 = 5  -> 00000000100000 -> PhoisTriMatchF4Path = 32   -> HLT_Photon50_CaloIdVL_v
-     // if itrig4 = 6  -> 00000001000000 -> PhoisTriMatchF4Path = 64   -> HLT_Photon50_CaloIdVL_IsoL_v
-     // if itrig4 = 7  -> 00000010000000 -> PhoisTriMatchF4Path = 128  -> HLT_Photon75_CaloIdVL_v
-     // if itrig4 = 8  -> 00000100000000 -> PhoisTriMatchF4Path = 256  -> HLT_Photon75_CaloIdVL_IsoL_v
-     // if itrig4 = 9  -> 00001000000000 -> PhoisTriMatchF4Path = 512  -> HLT_Photon90_CaloIdVL_v
-     // if itrig4 = 10 -> 00010000000000 -> PhoisTriMatchF4Path = 1024 -> HLT_Photon90_CaloIdVL_IsoL_v
-     // if itrig4 = 11 -> 00100000000000 -> PhoisTriMatchF4Path = 2048 -> HLT_Photon135_v
-     // if itrig4 = 12 -> 01000000000000 -> PhoisTriMatchF4Path = 4096 -> HLT_Photon150_v
-	}
-	}
+     	if (PAT_photon.triggerObjectMatchesByPath(triggerFamily4_[itrig4]+"*").size()==1) {
+     		PhoisTriMatchF4Path |= 1<<itrig4;
+     		// if itrig4 = 0  -> 00000000000001 -> PhoisTriMatchF4Path = 1    -> HLT_Photon20_CaloIdVL_v
+     		// if itrig4 = 1  -> 00000000000010 -> PhoisTriMatchF4Path = 2    -> HLT_Photon20_CaloIdVL_IsoL_v
+     		// if itrig4 = 2  -> 00000000000100 -> PhoisTriMatchF4Path = 4    -> HLT_Photon30_v
+     		// if itrig4 = 3  -> 00000000001000 -> PhoisTriMatchF4Path = 8    -> HLT_Photon30_CaloIdVL_v
+     		// if itrig4 = 4  -> 00000000010000 -> PhoisTriMatchF4Path = 16   -> HLT_Photon30_CaloIdVL_IsoL_v
+     		// if itrig4 = 5  -> 00000000100000 -> PhoisTriMatchF4Path = 32   -> HLT_Photon50_CaloIdVL_v
+     		// if itrig4 = 6  -> 00000001000000 -> PhoisTriMatchF4Path = 64   -> HLT_Photon50_CaloIdVL_IsoL_v
+     		// if itrig4 = 7  -> 00000010000000 -> PhoisTriMatchF4Path = 128  -> HLT_Photon75_CaloIdVL_v
+     		// if itrig4 = 8  -> 00000100000000 -> PhoisTriMatchF4Path = 256  -> HLT_Photon75_CaloIdVL_IsoL_v
+     		// if itrig4 = 9  -> 00001000000000 -> PhoisTriMatchF4Path = 512  -> HLT_Photon90_CaloIdVL_v
+     		// if itrig4 = 10 -> 00010000000000 -> PhoisTriMatchF4Path = 1024 -> HLT_Photon90_CaloIdVL_IsoL_v
+     		// if itrig4 = 11 -> 00100000000000 -> PhoisTriMatchF4Path = 2048 -> HLT_Photon135_v
+     		// if itrig4 = 12 -> 01000000000000 -> PhoisTriMatchF4Path = 4096 -> HLT_Photon150_v
+     	}
+     }
 
 	 // if(it->isEB()){
 	 //   //if H/E<0.15 and sigmaietaieta<0.024 -> ID is passed
@@ -2436,8 +2436,8 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
         lepSigmaIEtaIEta_      ->push_back(myLeptons[l].sigmaIEtaIEta);
         TriMatchF1Path_doubleMu_->push_back(myLeptons[l].TriMatchF1Path);
         TriMatchF2Path_doubleEle_->push_back(myLeptons[l].TriMatchF2Path);
-        TriMatchF3Path_MuEle_electron_->push_back(myLeptons[l].TriMatchF3elePath);
         TriMatchF3Path_MuEle_muon_->push_back(myLeptons[l].TriMatchF3muPath);
+        TriMatchF3Path_MuEle_electron_->push_back(myLeptons[l].TriMatchF3elePath);
         TriMatchF5Path_singleMu_->push_back(myLeptons[l].TriMatchF5Path);
         TriMatchF6Path_singleEle_->push_back(myLeptons[l].TriMatchF6Path);
       }      
@@ -2951,6 +2951,7 @@ void PATZJetsExpress::buildTree()
     myTree_->Branch("photonIsoFPRRandomConePhoton",          "vector<float>"   ,&photonIsoFPRRandomConePhoton_);
     myTree_->Branch("photonBit","vector<int>",&photonBit_ );
   }
+    myTree_->Branch("TriMatchF4Path_photon"          ,"vector<int>"     ,&TriMatchF4Path_photon_);
   // ---- trigger variables ---------------------------------------------
   myTree_->Branch("fired"            ,"vector<int>"       ,&fired_);
   myTree_->Branch("prescaleL1"       ,"vector<int>"       ,&prescaleL1_);
@@ -2972,7 +2973,7 @@ void PATZJetsExpress::buildTree()
   myTree_->Branch("TriMatchF3Path_MuEle_muon"    ,"vector<int>"        ,&TriMatchF3Path_MuEle_muon_);
   myTree_->Branch("TriMatchF3Path_MuEle_electron","vector<int>"        ,&TriMatchF3Path_MuEle_electron_);
   myTree_->Branch("TriMatchF5Path_singleMu"      ,"vector<int>"        ,&TriMatchF5Path_singleMu_);
-myTree_->Branch("TriMatchF6Path_singleEle"     ,"vector<int>"        ,&TriMatchF6Path_singleEle_);
+  myTree_->Branch("TriMatchF6Path_singleEle"     ,"vector<int>"        ,&TriMatchF6Path_singleEle_);
   // ---- jet variables -------------------------------------------------
   myTree_->Branch("jetVeto"          ,"vector<int>"       ,&jetVeto_);
   myTree_->Branch("jetPt"            ,"vector<float>"     ,&jetPt_);
@@ -3163,7 +3164,7 @@ void PATZJetsExpress::clearTree()
   photonIsoFPRRandomConeCharged_            ->clear();
   photonIsoFPRRandomConeNeutral_            ->clear();
   photonIsoFPRRandomConePhoton_             ->clear();
-   TriMatchF4Path_photon_          ->clear();
+  TriMatchF4Path_photon_          ->clear();
 
 
   isTriggered_       =    0; // please keep this 0
