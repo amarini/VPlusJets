@@ -3052,7 +3052,7 @@ void PATZJetsExpress::buildTree()
   myTree_->Branch("jetIdGEN"         ,"vector<int>"     ,&jetIdGEN_);
   myTree_->Branch("jetNpartonsGEN"   ,"vector<int>"     ,&jetNpartonsGEN_);
   myTree_->Branch("HTParSum"         ,&HTParSum_          ,"HTParSum/F");  
-  myTree_->Branch("nParton"          ,&nParton_          ,"nParton/F");  
+  myTree_->Branch("nParton"          ,&nParton_          ,"nParton/I");  
   myTree_->Branch("mcWeight"         ,&mcWeight_          ,"mcWeight/F");
   myTree_->Branch("qScale"           ,&qScale_            ,"qScale/F");
   myTree_->Branch("alphaQED"         ,&alphaQED_          ,"alphaQED/F");
