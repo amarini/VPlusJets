@@ -330,6 +330,7 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       TH1F* hXSec_;
       // ---- simulated in-time pile-up ---------------------------------
       TH1D  *mcPU_;
+      TH1D  *mcTruePU_;
       // ---- flag to set the JEC uncertainty object --------------------
       //bool mIsJECuncSet;
       // ---- jet energy corrector object -------------------------------
@@ -851,7 +852,8 @@ void PATZJetsExpress::beginJob()
   for(unsigned i=0;i<triggerNames_.size();i++)hTriggerNames_->Fill(triggerNames_[i].c_str(),1);
   hTriggerPass_          = fTFileService->make<TH1F>("TriggerPass","TriggerPass",1,0,1);
   hTriggerPass_  ->SetBit(TH1::kCanRebin);
-  mcPU_                  = fTFileService->make<TH1D>("mcPU", "mcPU",40,0,40);
+  mcPU_                  = fTFileService->make<TH1D>("mcPU", "mcPU",100,0,100);
+  mcTruePU_                  = fTFileService->make<TH1D>("mcTruePU", "mcTruePU",100,0,100);
 
   hWEvents_              = fTFileService->make<TH1I>("WEvents", "Weighted Events",1,0,1);hWEvents_->Sumw2();
 
@@ -1020,6 +1022,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 
       }// PUI loop
       mcPU_->Fill(puINT_);
+      mcTruePU_->Fill(puTrueINT_);
     }
     // --- MC weight
     Handle<GenEventInfoProduct> geninfo;  
