@@ -132,6 +132,9 @@
 #include "CondFormats/JetMETObjects/interface/JetResolution.h"
 #include <sys/stat.h>
 #include "CLHEP/Random/RandGauss.h"
+
+//STD
+#include <exception>
 //
 // class declaration
 //
@@ -1186,10 +1189,16 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       }//gen status IF
 	//HTParSum
       if(i_gen->status()== 3){
+      		const GenParticle* gen_Dau;
+		bool hasDaughterStatusThree=false;
+      		for(int kk = 0; kk < int(i_gen-> numberOfDaughters()); ++kk) {
+			gen_Dau = static_cast<const GenParticle*>(i_gen->daughter(kk)); // find daughter
+			if(gen_Dau->status()==3)hasDaughterStatusThree=true;
+			}
 		switch(abs(i_gen->pdgId())){
 		case 1:case 2: case 3: case 4: case 5:case 6: case 21: //quark udscbt and gluons?
-			HTParSum_+=i_gen->pt();
-			nParton_++;
+			if(!hasDaughterStatusThree)HTParSum_+=i_gen->pt();
+			if(!hasDaughterStatusThree)nParton_++;
 			break;
 		default: break;
 		}
@@ -1206,6 +1215,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       // ---- genlepton - genjet cross cleaning -------------------------
       //bool isISO(true);
       int isVETO=0;
+     if(i_genjet->pt() < 10 ) continue; //SAFE
       //if(mGENCrossCleaning&1)
       {
 	for(unsigned l=0;l<myGenLeptons.size();l++) { 
@@ -1280,6 +1290,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       float DR_parton=0.5;
       float pt_parton=0;
       for(i_gen = gen->begin(); i_gen != gen->end(); i_gen++) {
+	if(i_gen->pt()<.1)continue;
 	if(i_gen->status()==3){
 	  TLorentzVector i_gen_lv(i_gen->p4().Px(),i_gen->p4().Py(),i_gen->p4().Pz(),i_gen->p4().E());
 	  //take out the incoming protons before the collision - otherwise code crashes
