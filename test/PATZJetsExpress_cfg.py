@@ -24,9 +24,9 @@ from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 if(isMC):
-	process.GlobalTag.globaltag = 'START53_V22::All'    # MC 53Y release < CMSSW_5_3_8_patch3
+	process.GlobalTag.globaltag = 'START53_V26::All'    # MC 53Y release < CMSSW_5_3_8_patch3
 else:
-	process.GlobalTag.globaltag = 'FT_53_V21_AN4::All'  # Winter13 2012 A, B, C, D datasets re-reco with CMSSW_5_3_7_patch6 
+	process.GlobalTag.globaltag = 'FT_53_V21_AN5::All'  # Winter13 2012 A, B, C, D datasets re-reco with CMSSW_5_3_7_patch6 
 	#-----------------2012 A, B, C, D datasets re-reco + prompt with CMSSW > 5_3_2 (official recommendation) 
 	#process.GlobalTag.globaltag = 'FT_53_V6C_AN3::All'  # 2012AB - July13 2012 - re-reco of 2012AB in 53X
 	#process.GlobalTag.globaltag = 'FT_53_V6C_AN3::All' # 2012A - Aug06 2012 - re-reco of run-range 190782-190949 
