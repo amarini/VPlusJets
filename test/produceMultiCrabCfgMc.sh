@@ -1,0 +1,62 @@
+#!/bin/bash
+
+#this file will print out a multicrab configuration to run on the full ReReco data
+
+cat <<EOF
+# section for multicrab: now has just the template crab.cfg, but more
+# keys might appear in the future
+[MULTICRAB]
+#cfg=crab.cfg
+
+# Section [COMMON] is common for all datasets
+# General idea: you define all the parameter in the template (crab.cfg), 
+# but you might want to change the template values for all dataset.
+# The general syntax is that you first put the crab.cfg [SECTION] and
+# the the crab.cfg [key], with a "." in between, exactly as you would do
+# to pass to CRAB keys via command line.
+
+[COMMON]
+
+# This determines the direcory where the CRAB log files and CMSSW output files will go.
+# It will be USER.ui_working_dir/section_name/
+# where section_name is the corresponding  section "[xyz]" that you give below.
+CRAB.jobtype = cmssw
+CRAB.scheduler = remoteGlidein
+CRAB.use_server = 0
+
+CMSSW.output_file = PATZJetsExpress.root
+#CMSSW.total_number_of_lumis = -1
+
+USER.return_data = 0
+USER.eMail = amarini@cern.ch
+USER.copy_data = 1
+USER.se_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
+USER.ce_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
+USER.ui_working_dir = Mc
+#USER.storage_element = srm-eoscms.cern.ch
+#USER.storage_path=/srm/v2/server?SFN=/eos/cms/store/user/amarini/zjets_V00-12
+USER.storage_element = T2_CH_CSCS 
+
+CMSSW.number_of_jobs = 500
+CMSSW.total_number_of_events = -1
+
+EOF
+
+for i in "/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM" "/DYJetsToLL_PtZ-100_TuneZ2star_8TeV_ext-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM" "/DYJetsToLL_PtZ-50To70_TuneZ2star_8TeV_ext-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM" "/DYJetsToLL_PtZ-70To100_TuneZ2star_8TeV_ext-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM" "/DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM" "/DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7C-v1/AODSIM" "/DY3JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM" "/DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM" "/DYJets_0p0_1p2_2p10_3p15_4p15_CT10_8TeV-sherpa/Summer12_DR53X-PU_S10_START53_V7C-v2/AODSIM" "/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_RD1_START53_V7N-v1/AODSIM"
+do
+#echo $i ; 
+
+echo "[$(echo $i | sed 's:/::' | sed 's:/:_:g')]"
+echo "CMSSW.datasetpath=$i"
+echo "CMSSW.lumi_mask = /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
+if echo "$i" | grep "RD1" &>/dev/null ; then
+	echo "CMSSW.pset = PATZJetsExpressRD_cfg.py"
+else
+	echo "CMSSW.pset = PATZJetsExpress_cfg.py"
+fi
+#echo "USER.user_remote_dir = $(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
+echo "USER.user_remote_dir = zjets_V00_12/$(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
+echo 
+echo
+
+done

@@ -1,0 +1,4 @@
+# RunMin RunMax Lumifb PileupTarget 2 3
+190600 197000 5.288 pileup/MyPileup_RunAB.root pileup/MyPileup_RunAB_DN.root pileup/MyPileup_RunAB_UP.root
+197000 203750 7.055 pileup/MyPileup_RunC.root pileup/MyPileup_RunC_DN.root pileup/MyPileup_RunC_UP.root
+203750 209000 7.369 pileup/MyPileup_RunD.root pileup/MyPileup_RunD_DN.root pileup/MyPileup_RunD_UP.root

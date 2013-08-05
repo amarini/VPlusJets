@@ -51,6 +51,7 @@ double CrossSection::xSection(string match){
 
 #include "AddEventWeight.C"
 #include "AddPUWeight.C"
+#include "AddRDWeight.C"
 
 int Usage(const char *progName){
 	printf("Usage:\n");
@@ -59,6 +60,7 @@ int Usage(const char *progName){
 	printf("             - pu 1: add PUWeight+1s. Pileupfile is pileup/all.json.pileup_UP.root\n");
 	printf("             - pu -1: add PUWeight-1s. Pileupfile is pileup/all.json.pileup_DN.root\n");
 	printf("             - pu 10: add PUWeight \n");
+	printf("             - pu 100: add RDWeights \n");
 	return 0;
 }
 
@@ -100,6 +102,23 @@ int main(int argc, char**argv){
 		}else if(pu==-1){
 			AddPUWeight(argv[1],"mcPU","accepted","events",-1);
 			}
+		else if(pu==100)
+			{
+			CrossSection A;
+				size_t found;
+				found=string(argv[0]).find_last_of("/\\");	
+				string folder=string(argv[0]).substr(0,found);
+			A.ReadTxtFile( (folder+ "/xSec.ini").c_str());
+			double xSec=A.xSection(argv[1]);
+
+			if (xSec==CrossSection::noMatch){printf("No match Cross Section in the Database\n");return -1;}
+			if (xSec==CrossSection::multipleMatch){printf("Multiple matches in Cross Section in the Database\n");return -1;}
+			printf("xSec=%.1lf\n",xSec);
+	
+			printf("Going to execute:\n AddRDWeight.C+'(\"%s\",\"accepted\",\"events\",%f,\"processedData\",\"RunAndLumi.txt\",1.0)';\n",argv[1],xSec);	
+			AddRDWeight(argv[1],"accepted","events",xSec,"processedData","RunAndLumi.txt",1.0);
+			}
+				
 			
 		
 		}
