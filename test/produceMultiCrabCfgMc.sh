@@ -48,7 +48,6 @@ do
 
 echo "[$(echo $i | sed 's:/::' | sed 's:/:_:g')]"
 echo "CMSSW.datasetpath=$i"
-echo "CMSSW.lumi_mask = /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 if echo "$i" | grep "RD1" &>/dev/null ; then
 	echo "CMSSW.pset = PATZJetsExpressRD_cfg.py"
 else
