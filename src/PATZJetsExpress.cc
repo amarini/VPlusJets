@@ -899,6 +899,7 @@ void PATZJetsExpress::beginJob()
 	processedDataTree_->Branch("lumiNum",&lumi_,"lumiNum/I");
 	processedDataTree_->Branch("eventNum",&eventNum_,"eventNum/l");
 	processedDataTree_->Branch("mcWeight",&mcWeight_,"mcWeight/F");
+	processedDataTree_->Branch("puTrueINT",&puTrueINT_,"puTrueINT/I");
   // ---- set the jec uncertainty flag ----------------------------------
   //mIsJECuncSet = false; 
 }
@@ -1044,7 +1045,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	pdf2Id_   = geninfo->pdf()->id.second;
 	scalePDF_ = geninfo->pdf()->scalePDF;
     	hWEvents_->Fill(0.5,mcWeight_);
-    	processedDataTree_->Fill();
+    	processedDataTree_->Fill(); 
 	}
     // --- Gen Jets
     Handle<GenJetCollection> genjets;
