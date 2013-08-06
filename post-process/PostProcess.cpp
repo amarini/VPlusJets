@@ -94,13 +94,13 @@ int main(int argc, char**argv){
 			if (xSec==CrossSection::multipleMatch){printf("Multiple matches in Cross Section in the Database\n");return -1;}
 			printf("xSec=%.1lf\n",xSec);
 			AddEventWeight(argv[1],"accepted",xSec,"events","WEvents",1.0);
-			AddPUWeight(argv[1],"mcPU");
+			AddPUWeight(argv[1],"mcTruePU");
 		}else if(pu==10){
-			AddPUWeight(argv[1],"mcPU");
+			AddPUWeight(argv[1],"mcTruePU");
 		}else if(pu ==1){
-			AddPUWeight(argv[1],"mcPU","accepted","events",1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1);
 		}else if(pu==-1){
-			AddPUWeight(argv[1],"mcPU","accepted","events",-1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1);
 			}
 		else if(pu==100)
 			{

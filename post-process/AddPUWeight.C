@@ -60,45 +60,6 @@ int AddPUWeight(	const char * FileName="ntuple.root", //File name
 	if(DeltaPU<0) {TFile *f3=TFile::Open("pileup/all.json.pileup_DN.root");pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
 	if(pileup==NULL) {fprintf(stderr,"NO PILEUP FILE or HISTO\n");}
 	f->cd(Directory);
-//   TH1F *pileup = new TH1F("pileup","data-derived pileup distrubution",36,0,36);
-//   pileup->Sumw2();
-//   pileup->SetBinContent(1,1.34465e+07);
-//   pileup->SetBinContent(2,5.90653e+07);
-//   pileup->SetBinContent(3,1.40903e+08);
-//   pileup->SetBinContent(4,2.41301e+08);
-//   pileup->SetBinContent(5,3.33745e+08);
-//   pileup->SetBinContent(6,3.98711e+08);
-//   pileup->SetBinContent(7,4.30106e+08);
-//   pileup->SetBinContent(8,4.32283e+08);
-//   pileup->SetBinContent(9,4.1382e+08);
-//   pileup->SetBinContent(10,3.82846e+08);
-//   pileup->SetBinContent(11,3.45164e+08);
-//   pileup->SetBinContent(12,3.04344e+08);
-//   pileup->SetBinContent(13,2.62555e+08);
-//   pileup->SetBinContent(14,2.21331e+08);
-//   pileup->SetBinContent(15,1.81983e+08);
-//   pileup->SetBinContent(16,1.4569e+08);
-//   pileup->SetBinContent(17,1.13413e+08);
-//   pileup->SetBinContent(18,8.57789e+07);
-//   pileup->SetBinContent(19,6.30124e+07);
-//   pileup->SetBinContent(20,4.49596e+07);
-//   pileup->SetBinContent(21,3.1169e+07);
-//   pileup->SetBinContent(22,2.10079e+07);
-//   pileup->SetBinContent(23,1.37759e+07);
-//   pileup->SetBinContent(24,8.79641e+06);
-//   pileup->SetBinContent(25,5.47442e+06);
-//   pileup->SetBinContent(26,3.32378e+06);
-//   pileup->SetBinContent(27,1.97064e+06);
-//   pileup->SetBinContent(28,1.14204e+06);
-//   pileup->SetBinContent(29,647539);
-//   pileup->SetBinContent(30,359547);
-//   pileup->SetBinContent(31,195673);
-//   pileup->SetBinContent(32,104460);
-//   pileup->SetBinContent(33,54745.2);
-//   pileup->SetBinContent(34,28185.6);
-//   pileup->SetBinContent(35,28005.5);
-//   pileup->SetBinContent(36,0.008);
-//   pileup->SetEntries(3.89821e+09);
 	fprintf(stderr,"Scaling pileup data\n");
    pileup->Scale(1./pileup->Integral("width"));
 	//
