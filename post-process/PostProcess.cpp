@@ -115,8 +115,8 @@ int main(int argc, char**argv){
 			if (xSec==CrossSection::multipleMatch){printf("Multiple matches in Cross Section in the Database\n");return -1;}
 			printf("xSec=%.1lf\n",xSec);
 	
-			printf("Going to execute:\n AddRDWeight.C+'(\"%s\",\"accepted\",\"events\",%f,\"processedData\",\"RunAndLumi.txt\",1.0)';\n",argv[1],xSec);	
-			AddRDWeight(argv[1],"accepted","events",xSec,"processedData","RunAndLumi.txt",1.0);
+			printf("Going to execute:\n AddRDWeight.C+'(\"%s\",\"accepted\",\"events\",%f,\"processedData\",\"%s/RunAndLumi.txt\",1.0)';\n",argv[1],xSec,folder.c_str());	
+			AddRDWeight(argv[1],"accepted","events",xSec,"processedData",string(folder + "/RunAndLumi.txt").c_str(),1.0);
 			}
 				
 			
