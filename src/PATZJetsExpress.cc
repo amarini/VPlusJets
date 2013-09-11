@@ -318,7 +318,8 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       TTree *myTree_;
       TTree *processedDataTree_;
       // ---- histogram to record the number of events ------------------
-      TH1I  *hRecoLeptons_,*hRecoPhotons_,*hGenLeptons_,*hEvents_,*hWEvents_;
+      TH1I  *hRecoLeptons_,*hRecoPhotons_,*hGenLeptons_,*hEvents_;
+      TH1D  *hWEvents_;
       TH1F  *hMuMuMass_,*hElElMass_,*hElMuMass_;
       TH1F  *hZMuMuMass_,*hZElElMass_;
       TH1F  *hMuMuMassWeighted_,*hElElMassWeighted_,*hElMuMassWeighted_;
@@ -858,7 +859,7 @@ void PATZJetsExpress::beginJob()
   mcPU_                  = fTFileService->make<TH1D>("mcPU", "mcPU",100,0,100);
   mcTruePU_                  = fTFileService->make<TH1D>("mcTruePU", "mcTruePU",100,0,100);
 
-  hWEvents_              = fTFileService->make<TH1I>("WEvents", "Weighted Events",1,0,1);hWEvents_->Sumw2();
+  hWEvents_              = fTFileService->make<TH1D>("WEvents", "Weighted Events",1,0,1);hWEvents_->Sumw2();
 
   hMuMuMassWeighted_     = fTFileService->make<TH1F>("MuMuMassWeighted", "MuMuMassWeighted",40,71,111);hMuMuMassWeighted_->Sumw2();
   hElElMassWeighted_     = fTFileService->make<TH1F>("ElElMassWeighted", "ElElMassWeighted",40,71,111);hElElMassWeighted_->Sumw2();
@@ -1354,7 +1355,6 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
     //---- conversions for conversion-safe electron veto -------------------
     Handle<reco::ConversionCollection> hConversions;
     iEvent.getByLabel("allConversions", hConversions);
-    
     //---- leptons block --------------------------------------------------
     //  Handle<View<GsfElectron> > electrons_;
     Handle<GsfElectronCollection> electrons_;
@@ -1533,6 +1533,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
     int EleisTriMatchF3Path = 0;
     int EleisTriMatchF6Path = 0;
     for(GsfElectronCollection::const_iterator i_el = electrons_->begin();i_el != electrons_->end(); ++i_el) {
+	if( i_el->p4().Pt()  < 1) continue; //SAFECUT - will call eta()
       float elPt                           = i_el->p4().Pt();
       float elEta                          = i_el->p4().Eta();
       float sigmaIetaIeta                  = i_el->sigmaIetaIeta();
@@ -1724,7 +1725,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  bool passPhotCaloId = false;
 
 	  //---- don't bother if it has pt less than 15 GeV ----------------------
-	  if(it->pt() < 15) continue;
+	  if(it->pt() < 15) continue;//SAFE
 	  if(abs(it->eta()) > mMaxPhoEta) continue;
 	  if(it->isEBEEGap())continue;
 	  if(ConversionTools::hasMatchedPromptElectron(it->superCluster(), electrons_, hConversions, beamspot.position())) continue;
@@ -2109,7 +2110,11 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       //----- remove the leptons ------------------------------------------
       for(unsigned int i_lep = 0; i_lep < myLeptons.size(); i_lep++) {
 	if(i_lep>=2)continue;
-	float DR = myLeptons[i_lep].p4.DeltaR(jetP4);
+	float DR =0;
+	try{
+	DR= myLeptons[i_lep].p4.DeltaR(jetP4);
+	}
+	catch (...){std::cout<<"Exception occourred on DR calculation. Setting it to 0."<<endl;};
 	if (DR < mJetLepIsoR) {
 	  jetIsDuplicate |= 1<<i_lep; 
 	   //set veto counter on jets which would survive the final selection
