@@ -10,17 +10,17 @@ XSEC=69300
 XSECUP=72765
 XSECDN=65835
 
-#### pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSEC   --maxPileupBin 100 --numPileupBins 100  MyPileup.root
-#### 
-#### pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSECUP --maxPileupBin 100 --numPileupBins 100  MyPileup_UP.root
-#### 
-#### pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSECDN --maxPileupBin 100 --numPileupBins 100  MyPileup_DN.root
+ pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSEC   --maxPileupBin 100 --numPileupBins 100  MyPileup.root
+ 
+ pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSECUP --maxPileupBin 100 --numPileupBins 100  MyPileup_UP.root
+ 
+ pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSECDN --maxPileupBin 100 --numPileupBins 100  MyPileup_DN.root
 
 #### For HLT 
 for HLT in HLT_Photon90_CaloIdVL_v HLT_Photon90_CaloIdVL_IsoL_v HLT_Photon135_v HLT_Photon150_v ; do
 	pixelLumiCalc.py lumibyls -i $JSON --hltpath "$HLT*" -o json_${HLT}.csv
 	pileupReCalc_HLTpaths.py -i json_${HLT}.csv --inputLumiJSON $PILEUP -o json_${HLT}.txt
-	pileupCalc.py -i json_${HLT}.txt --inputLumiJSON $PILEUP --calcMode true  --minBiasXsec $XSEC   --maxPileupBin 100 --numPileupBins 100 MyPileup_$HLT.root
-	pileupCalc.py -i json_${HLT}.txt --inputLumiJSON $PILEUP --calcMode true  --minBiasXsec $XSECUP --maxPileupBin 100 --numPileupBins 100 MyPileup_UP_$HLT.root
-	pileupCalc.py -i json_${HLT}.txt --inputLumiJSON $PILEUP --calcMode true  --minBiasXsec $XSECDN --maxPileupBin 100 --numPileupBins 100 MyPileup_DN_$HLT.root
+	pileupCalc.py -i $JSON --inputLumiJSON json_${HLT}.txt --calcMode true  --minBiasXsec $XSEC   --maxPileupBin 100 --numPileupBins 100 MyPileup_$HLT.root
+	pileupCalc.py -i $JSON --inputLumiJSON json_${HLT}.txt --calcMode true  --minBiasXsec $XSECUP --maxPileupBin 100 --numPileupBins 100 MyPileup_UP_$HLT.root
+	pileupCalc.py -i $JSON --inputLumiJSON json_${HLT}.txt --calcMode true  --minBiasXsec $XSECDN --maxPileupBin 100 --numPileupBins 100 MyPileup_DN_$HLT.root
 done
