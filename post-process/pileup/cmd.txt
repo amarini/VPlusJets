@@ -17,7 +17,13 @@ XSECDN=65835
  pileupCalc.py -i $JSON --inputLumiJSON $PILEUP --calcMode true --minBiasXsec $XSECDN --maxPileupBin 100 --numPileupBins 100  MyPileup_DN.root
 
 #### For HLT 
-for HLT in HLT_Photon90_CaloIdVL_v HLT_Photon90_CaloIdVL_IsoL_v HLT_Photon135_v HLT_Photon150_v ; do
+rm lumis.txt
+
+for HLT in HLT_Photon20_CaloIdVL_v HLT_Photon30_CaloIdVL_v HLT_Photon50_CaloIdVL_v HLT_Photon75_CaloIdVL_v  HLT_Photon90_CaloIdVL_v HLT_Photon90_CaloIdVL_IsoL_v HLT_Photon135_v HLT_Photon150_v; do
+	echo $HLT >> lumis.txt
+	#### LUMIC CALC FOR PRESCALES
+	pixelLumiCalc.py -i $JSON --hltpath "$HLT*"  recorded | tail -n 10 >>lumis.txt
+	### CALC FOR PILEUP
 	pixelLumiCalc.py lumibyls -i $JSON --hltpath "$HLT*" -o json_${HLT}.csv
 	pileupReCalc_HLTpaths.py -i json_${HLT}.csv --inputLumiJSON $PILEUP -o json_${HLT}.txt
 	pileupCalc.py -i $JSON --inputLumiJSON json_${HLT}.txt --calcMode true  --minBiasXsec $XSEC   --maxPileupBin 100 --numPileupBins 100 MyPileup_$HLT.root

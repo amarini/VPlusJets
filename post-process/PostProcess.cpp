@@ -59,6 +59,8 @@ int Usage(const char *progName){
 	printf("             - pu 0: add Cross Section Weights  And PUWeight. Pileupfile is pileup/all.json.pileup.root\n");
 	printf("             - pu 1: add PUWeight+1s. Pileupfile is pileup/all.json.pileup_UP.root\n");
 	printf("             - pu -1: add PUWeight-1s. Pileupfile is pileup/all.json.pileup_DN.root\n");
+	printf("             - pu 5: Do pu 0 + HLT PUWeights\n");
+	printf("             - pu 6: HLT PUWeights\n");
 	printf("             - pu 10: add PUWeight \n");
 	printf("             - pu 100: add RDWeights \n");
 	return 0;
@@ -83,7 +85,7 @@ int main(int argc, char**argv){
 		int pu;
 		printf("3\n");//DEBUG
 		sscanf(argv[2],"%d",&pu);
-		if(pu==0){
+		if(pu==0 || pu==5){
 			CrossSection A;
 				size_t found;
 				found=string(argv[0]).find_last_of("/\\");	
@@ -117,6 +119,31 @@ int main(int argc, char**argv){
 	
 			printf("Going to execute:\n AddRDWeight.C+'(\"%s\",\"accepted\",\"events\",%f,\"processedData\",\"%s/RunAndLumi.txt\",1.0)';\n",argv[1],xSec,folder.c_str());	
 			AddRDWeight(argv[1],"accepted","events",xSec,"processedData",string(folder + "/RunAndLumi.txt").c_str(),1.0);
+			}
+		if( pu==5 || pu ==6){
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon150_v.root","PUWeight_HLT_Photon150"); // the Branch Name for Syst is fixed inside
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon150_v.root","PUWeight_HLT_Photon150"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon150_v.root","PUWeight_HLT_Photon150");
+
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon135_v.root","PUWeight_HLT_Photon135"); // the Branch Name for Syst is fixed inside
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon135_v.root","PUWeight_HLT_Photon135"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon135_v.root","PUWeight_HLT_Photon135");
+
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90"); //
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90");
+
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75"); //
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75");
+
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50"); //
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50");
+
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30"); //
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30"); 
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30");
 			}
 				
 			

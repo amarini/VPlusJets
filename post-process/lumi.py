@@ -8,6 +8,7 @@ ROOTimported = False
 try:
     import ROOT
     ROOTimported = True
+    ROOT.gROOT.SetBatch();
 
 except ImportError:
     if os.environ.has_key('ROOTSYS'):

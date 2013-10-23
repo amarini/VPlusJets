@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <string>
+using namespace std;
+
 //#include "pileup_Data_v2.C"
 
 int AddPUWeight(	const char * FileName="ntuple.root", //File name
@@ -13,7 +16,9 @@ int AddPUWeight(	const char * FileName="ntuple.root", //File name
 			const char* Directory="accepted", //Directory name in the root file 
 			const char* TreeName="events", // Tree Name in the directory Chosen
 			int DeltaPU=0,
-			int TrueDistr=1 // 1 for true 0 for false (observed)
+			int TrueDistr=1, // 1 for true 0 for false (observed)
+			const char * PUFile="pileup/all.json.pileup.root",
+			const char * branchName="PUWeight"
 		   	)
 {
 	//declare a temporary string variable
@@ -55,10 +60,10 @@ int AddPUWeight(	const char * FileName="ntuple.root", //File name
 		PU->Scale(1./PU->Integral("width"));
 		}
      TH1D* pileup=NULL;
-	if(DeltaPU==0) {TFile *f3=TFile::Open("pileup/all.json.pileup.root");pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
-	if(DeltaPU>0) {TFile *f3=TFile::Open("pileup/all.json.pileup_UP.root");pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
-	if(DeltaPU<0) {TFile *f3=TFile::Open("pileup/all.json.pileup_DN.root");pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
-	if(pileup==NULL) {fprintf(stderr,"NO PILEUP FILE or HISTO\n");}
+	if(DeltaPU==0) {TFile *f3=TFile::Open(  PUFile )    ;pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
+	if(DeltaPU>0)  {TFile *f3=TFile::Open(  PUFile )    ;pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
+	if(DeltaPU<0)  {TFile *f3=TFile::Open(  PUFile )    ;pileup=(TH1D*)f3->Get("pileup")->Clone();;} 
+	if(pileup==NULL) {fprintf(stderr,"NO PILEUP FILE or HISTO %s \n",PUFile);}
 	f->cd(Directory);
 	fprintf(stderr,"Scaling pileup data\n");
    pileup->Scale(1./pileup->Integral("width"));
@@ -67,9 +72,9 @@ int AddPUWeight(	const char * FileName="ntuple.root", //File name
 	double PUWeight;
 	//Creating an empty branch in the tree
 	TBranch *b;
-	if(DeltaPU==0)	{b=t->Branch("PUWeight",&PUWeight,"PUWeight/D");fprintf(stderr,"BranchName=PUWeight\n");}
-	else if (DeltaPU>0){ b=t->Branch("PUWeightSysUp",&PUWeight,"PUWeightSysUp/D");fprintf(stderr,"BranchName=PUWeightSysUp\n");}
-	else if (DeltaPU<0){ b=t->Branch("PUWeightSysDown",&PUWeight,"PUWeightSysDown/D");fprintf(stderr,"BranchName=PUWeightSysDown\n");}
+	if(DeltaPU==0)	   { b=t->Branch( Form("%s",branchName)       ,&PUWeight,Form("%s/D",branchName)       );fprintf(stderr,"BranchName=%s\n",branchName)       ;}
+	else if (DeltaPU>0){ b=t->Branch( Form("%sSysUp",branchName)  ,&PUWeight,Form("%sSysUp/D",branchName)  );fprintf(stderr,"BranchName=%sSysUp\n",branchName)  ;}
+	else if (DeltaPU<0){ b=t->Branch( Form("%sSysDown",branchName),&PUWeight,Form("%sSysDown/D",branchName));fprintf(stderr,"BranchName=%sSysDown\n",branchName);}
 
 	//Getting the Number of entries in the tree
 	long long int NumberEntries=t->GetEntries();
