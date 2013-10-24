@@ -120,27 +120,37 @@ int main(int argc, char**argv){
 			printf("Going to execute:\n AddRDWeight.C+'(\"%s\",\"accepted\",\"events\",%f,\"processedData\",\"%s/RunAndLumi.txt\",1.0)';\n",argv[1],xSec,folder.c_str());	
 			AddRDWeight(argv[1],"accepted","events",xSec,"processedData",string(folder + "/RunAndLumi.txt").c_str(),1.0);
 			}
+		if(pu == 5 ) {
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1);
+			}
 		if( pu==5 || pu ==6){
+			printf("Going to do HLT150\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon150_v.root","PUWeight_HLT_Photon150"); // the Branch Name for Syst is fixed inside
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon150_v.root","PUWeight_HLT_Photon150"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon150_v.root","PUWeight_HLT_Photon150");
 
+			printf("Going to do HLT135\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon135_v.root","PUWeight_HLT_Photon135"); // the Branch Name for Syst is fixed inside
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon135_v.root","PUWeight_HLT_Photon135"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon135_v.root","PUWeight_HLT_Photon135");
 
+			printf("Going to do HLT90\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90"); //
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon90_CaloIdVL_v.root","PUWeight_HLT_Photon90");
 
+			printf("Going to do HLT75\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75"); //
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon75_CaloIdVL_v.root","PUWeight_HLT_Photon75");
 
+			printf("Going to do HLT50\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50"); //
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon50_CaloIdVL_v.root","PUWeight_HLT_Photon50");
 
+			printf("Going to do HLT30\n");
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",0 ,1,"pileup/MyPileup_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30"); //
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",1 ,1,"pileup/MyPileup_UP_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30"); 
 			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/MyPileup_DN_HLT_Photon30_CaloIdVL_v.root","PUWeight_HLT_Photon30");

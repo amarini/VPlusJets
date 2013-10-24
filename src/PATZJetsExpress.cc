@@ -125,7 +125,8 @@
 #include "RecoEgamma/EgammaElectronAlgos/interface/ElectronHcalHelper.h"
 
 //Marco Isolation
-#include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
+//#include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
+#include "PFIsolation/SCFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
 
 #include "amarini/VPlusJets/interface/CiCPhotonID.h"
 //JER
@@ -179,13 +180,15 @@ class PATZJetsExpress : public edm::EDAnalyzer {
         // --- float parameters
         std::vector<float> parameters;
         
-        // --- MP foot print removal isolation
+        // --- Foot print removal isolation
         float isoFPRNeutral;
         float isoFPRCharged;
         float isoFPRPhoton;
 	float isoFPRRandomConeCharged;
 	float isoFPRRandomConeNeutral;
 	float isoFPRRandomConePhoton;
+	float isoFPRRandomConeEta;
+	float isoFPRRandomConePhi;
 
 	enum photonParameters {  
 		passconv, pfIsoCH, pfIsoNH, pfIsoP, pfCic03P, pfCic03N, pfCic04P, pfCic04N , pfCic03Cg, pfCic04Cg, pfCic03Cb, pfCic04Cb, 
@@ -197,7 +200,12 @@ class PATZJetsExpress : public edm::EDAnalyzer {
         	nTrkHollowConeDR04,
         	trkSumPtHollowConeDR04,
         	oldHadronicOverEm,
-        	hadronicOverEm2012, nPhotonParameters } ;
+        	hadronicOverEm2012, 
+		hcalTowerSumEtConeDR03,
+		trkSumPtHollowConeDR03,
+		pfCic02Cg,
+		nPhotonParameters 
+		} ;
 
         // --- sigma IetaIeta
         float sigmaIEtaIEta;
@@ -448,7 +456,10 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float>* photontrkSumPtSolidConeDR04_;
       vector<float>* photonnTrkHollowConeDR04_;
       vector<float>* photontrkSumPtHollowConeDR04_;
-	
+      //Pre Selection H->GG	
+      vector<float>* photonhcalTowerSumEtConeDR03_;
+      vector<float>* photontrkSumPtHollowConeDR03_;
+      vector<float>* photonPfIsoCharged02ForCicVtx0_;
       //PhotonIso
       vector<float>* photonIsoFPRCharged_; //with FOOT PRINT REMOVAL FROM MP
       vector<float>* photonIsoFPRNeutral_;
@@ -456,6 +467,9 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float>* photonIsoFPRRandomConeCharged_; //with FOOT PRINT REMOVAL FROM MP
       vector<float>* photonIsoFPRRandomConeNeutral_;
       vector<float>* photonIsoFPRRandomConePhoton_;
+      
+      vector<float>* photonIsoFPRRandomConeEta_;
+      vector<float>* photonIsoFPRRandomConePhi_;
 
       // ---- photon Trigger Matching -----------------------------------
       vector<int>* TriMatchF4Path_photon_; 
@@ -1805,18 +1819,23 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  //MP ISO
 	  //SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup); 
 	  SuperClusterFootprintRemoval remover(iEvent,iSetup,edm::ParameterSet()); //V01-00
+
 	  float photonIsoFPRCharged = remover.PFIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRNeutral = remover.PFIsolation("neutral",it->superCluster());
 	  float photonIsoFPRPhoton = remover.PFIsolation("photon",it->superCluster());
-	  float photonIsoFPRRandomConeCharged = remover.RandomConeIsolation("charged",it->superCluster(),0);
-	  float photonIsoFPRRandomConeNeutral = remover.RandomConeIsolation("neutral",it->superCluster());
-	  float photonIsoFPRRandomConePhoton = remover.RandomConeIsolation("photon",it->superCluster());
+
+	  PFIsolation_RandomCone_struct FPR_RC_out = remover.RandomConeIsolation(it->superCluster(),0); // V01-01 / will break at V01-02 because wants a pointer to the Vtx
+	  float photonIsoFPRRandomConeCharged = FPR_RC_out.chargediso; //remover.RandomConeIsolation("charged",it->superCluster(),0);
+	  float photonIsoFPRRandomConeNeutral = FPR_RC_out.neutraliso; //remover.RandomConeIsolation("neutral",it->superCluster());
+	  float photonIsoFPRRandomConePhoton  = FPR_RC_out.photoniso; //remover.RandomConeIsolation("photon",it->superCluster());
+	  float photonIsoFPRRandomConeEta     = FPR_RC_out.randomcone_eta;
+	  float photonIsoFPRRandomConePhi     = FPR_RC_out.randomcone_phi; // if RC is not ok, everything is -999
 
 	  // chiara: ma va fatto cosi'? c'era gia'
 	  isolator.fGetIsolation((&*it),pfCandidates.product(), myVtxRef, vertices_);
 	  float photonPfIsoCH = isolator.getIsolationCharged();
 	  float photonPfIsoNH = isolator.getIsolationNeutral();
-	  float photonPfIsoP   = isolator.getIsolationPhoton();
+	  float photonPfIsoP  = isolator.getIsolationPhoton();
 
 	  // chiara PF isolation for MVA ID and CICs - init
 	  float photonPfIsoP03Cic = cicPhotonId->pfEcalIso(phoRef, 0.3, 0.0, 0.070, 0.015, 0.0, 0.0, 0.0, reco::PFCandidate::gamma);  
@@ -1824,12 +1843,19 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  float photonPfIsoP04Cic = cicPhotonId->pfEcalIso(phoRef, 0.4, 0.0, 0.070, 0.015, 0.0, 0.0, 0.0, reco::PFCandidate::gamma); 
 	  float photonPfIsoN04Cic = cicPhotonId->pfHcalIso(phoRef, 0.4, 0.0, reco::PFCandidate::h0);	                          
 
+	  std::vector<float> vPhotonPfIsoCharged02ForCic;
 	  std::vector<float> vPhotonPfIsoCharged03ForCic;
 	  std::vector<float> vPhotonPfIsoCharged04ForCic;
+
+	  vPhotonPfIsoCharged02ForCic = cicPhotonId->pfTkIsoWithVertex(phoRef, 0.2, 0.02, 0.02, 0.0, 0.2, 0.1, reco::PFCandidate::h); 
 	  vPhotonPfIsoCharged03ForCic = cicPhotonId->pfTkIsoWithVertex(phoRef, 0.3, 0.02, 0.02, 0.0, 0.2, 0.1, reco::PFCandidate::h); 
 	  vPhotonPfIsoCharged04ForCic = cicPhotonId->pfTkIsoWithVertex(phoRef, 0.4, 0.02, 0.02, 0.0, 0.2, 0.1, reco::PFCandidate::h); 
+
+	  if (vPhotonPfIsoCharged02ForCic.size() != vertices_->size()) cout << " problem " << endl;
 	  if (vPhotonPfIsoCharged03ForCic.size() != vertices_->size()) cout << " problem " << endl;
 	  if (vPhotonPfIsoCharged04ForCic.size() != vertices_->size()) cout << " problem " << endl;
+
+	  float photonPfIsoC02Vtx0 = vPhotonPfIsoCharged02ForCic[0];  
 	  float photonPfIsoC03Vtx0 = vPhotonPfIsoCharged03ForCic[0];  
 	  float photonPfIsoC04Vtx0 = vPhotonPfIsoCharged04ForCic[0];  
 
@@ -2028,6 +2054,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  gamma.parameters[PARTICLE::pfCic03N]  = photonPfIsoN03Cic;
 	  gamma.parameters[PARTICLE::pfCic04P]  = photonPfIsoP04Cic;
 	  gamma.parameters[PARTICLE::pfCic04N]  = photonPfIsoN04Cic;
+	  gamma.parameters[PARTICLE::pfCic02Cg] = photonPfIsoC02Vtx0;
 	  gamma.parameters[PARTICLE::pfCic03Cg] = photonPfIsoC03Vtx0;
 	  gamma.parameters[PARTICLE::pfCic04Cg] = photonPfIsoC04Vtx0;
 	  gamma.parameters[PARTICLE::pfCic03Cb] = photonPfIsoC03Bad;
@@ -2051,12 +2078,16 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  //	  gamma.parameters[PARTICLE::phoHasConvTrks]=phoHasConvTrks;            
 	  gamma.parameters[PARTICLE::oldHadronicOverEm]=hadronicOverEm;             
 	  gamma.parameters[PARTICLE::hadronicOverEm2012]=hadronicOverEm2012;         
+	  gamma.parameters[PARTICLE::trkSumPtHollowConeDR03]=trkSumPtHollowConeDR03;
+	  gamma.parameters[PARTICLE::hcalTowerSumEtConeDR03]=hcalTowerSumEtConeDR03;
 	  gamma.isoFPRCharged=photonIsoFPRCharged ;
 	  gamma.isoFPRNeutral=photonIsoFPRNeutral ;
 	  gamma.isoFPRPhoton=photonIsoFPRPhoton ;
 	  gamma.isoFPRRandomConeCharged=photonIsoFPRRandomConeCharged;
 	  gamma.isoFPRRandomConeNeutral=photonIsoFPRRandomConeNeutral;
 	  gamma.isoFPRRandomConePhoton=photonIsoFPRRandomConePhoton;
+	  gamma.isoFPRRandomConeEta=photonIsoFPRRandomConeEta;
+	  gamma.isoFPRRandomConePhi=photonIsoFPRRandomConePhi;
 	  gamma.TriMatchF4Path = PhoisTriMatchF4Path;
 
 	  // --- save FSR photon candidates and gamma+jets in seperate paths
@@ -2482,6 +2513,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	photonPfIsoNeutrals03ForCic_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic03N]);
 	photonPfIsoPhotons04ForCic_  -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic04P]);
 	photonPfIsoNeutrals04ForCic_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic04N]);
+	photonPfIsoCharged02ForCicVtx0_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic02Cg]);
 	photonPfIsoCharged03ForCicVtx0_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic03Cg]);
 	photonPfIsoCharged04ForCicVtx0_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic04Cg]);
 	photonPfIsoCharged03BadForCic_ -> push_back(myPhotons[gg].parameters[PARTICLE::pfCic03Cb]);
@@ -2504,6 +2536,9 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	photontrkSumPtSolidConeDR04_->push_back(myPhotons[gg].parameters[PARTICLE::trkSumPtSolidConeDR04]);
 	photonnTrkHollowConeDR04_->push_back(myPhotons[gg].parameters[PARTICLE::nTrkHollowConeDR04]);
 	photontrkSumPtHollowConeDR04_->push_back(myPhotons[gg].parameters[PARTICLE::trkSumPtHollowConeDR04]);
+	photontrkSumPtHollowConeDR03_->push_back(myPhotons[gg].parameters[PARTICLE::trkSumPtHollowConeDR03]);
+	photonhcalTowerSumEtConeDR03_->push_back(myPhotons[gg].parameters[PARTICLE::hcalTowerSumEtConeDR03]);
+	
 	photonBit_->push_back(myPhotons[gg].bit);
 	photonIsoFPRCharged_->push_back(myPhotons[gg].isoFPRCharged);
 	photonIsoFPRNeutral_->push_back(myPhotons[gg].isoFPRNeutral);
@@ -2511,6 +2546,8 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	photonIsoFPRRandomConeCharged_->push_back(myPhotons[gg].isoFPRRandomConeCharged);
 	photonIsoFPRRandomConeNeutral_->push_back(myPhotons[gg].isoFPRRandomConeNeutral);
 	photonIsoFPRRandomConePhoton_->push_back(myPhotons[gg].isoFPRRandomConePhoton);
+	photonIsoFPRRandomConeEta_->push_back(myPhotons[gg].isoFPRRandomConeEta);
+	photonIsoFPRRandomConePhi_->push_back(myPhotons[gg].isoFPRRandomConePhi);
 	TriMatchF4Path_photon_->push_back(myPhotons[gg].TriMatchF4Path);
       }
 
@@ -2868,6 +2905,7 @@ void PATZJetsExpress::buildTree()
   photonPfIsoChargedHad_= new std::vector<float>();
   photonPfIsoNeutralHad_= new std::vector<float>();
   photonPfIsoPhoton_= new std::vector<float>();
+  photonPfIsoCharged02ForCicVtx0_= new std::vector<float>();
   photonPfIsoPhotons03ForCic_= new std::vector<float>();
   photonPfIsoNeutrals03ForCic_= new std::vector<float>();
   photonPfIsoCharged03ForCicVtx0_= new std::vector<float>();
@@ -2889,17 +2927,21 @@ void PATZJetsExpress::buildTree()
   photonid_hadronicOverEm_= new std::vector<float>();
   photonid_hadronicOverEm2012_= new std::vector<float>();
   photonhcalTowerSumEtConeDR04_= new std::vector<float>();
+  photonhcalTowerSumEtConeDR03_= new std::vector<float>();
   photonecalRecHitSumEtConeDR04_= new std::vector<float>();
   photonnTrkSolidConeDR04_= new std::vector<float>();
   photontrkSumPtSolidConeDR04_= new std::vector<float>();
   photonnTrkHollowConeDR04_= new std::vector<float>();
   photontrkSumPtHollowConeDR04_= new std::vector<float>();
+  photontrkSumPtHollowConeDR03_= new std::vector<float>();
   photonIsoFPRCharged_ = new std::vector<float>();
   photonIsoFPRNeutral_ = new std::vector<float>();
   photonIsoFPRPhoton_ = new std::vector<float>();
   photonIsoFPRRandomConeCharged_ = new std::vector<float>();
   photonIsoFPRRandomConeNeutral_ = new std::vector<float>();
   photonIsoFPRRandomConePhoton_ = new std::vector<float>();
+  photonIsoFPRRandomConeEta_ = new std::vector<float>();
+  photonIsoFPRRandomConePhi_ = new std::vector<float>();
   TriMatchF4Path_photon_ = new std::vector<int>();
 
   //  photonPar_         = new std::vector<float>();
@@ -2948,6 +2990,7 @@ void PATZJetsExpress::buildTree()
     myTree_->Branch("photonPfIsoNeutrals04ForCic",    "vector<float>"   ,&photonPfIsoNeutrals04ForCic_);      
     myTree_->Branch("photonPfIsoCharged04ForCicVtx0", "vector<float>"   ,&photonPfIsoCharged04ForCicVtx0_);      
     myTree_->Branch("photonPfIsoCharged04BadForCic",  "vector<float>"   ,&photonPfIsoCharged04BadForCic_);     
+    myTree_->Branch("photonPfIsoCharged02ForCicVtx0", "vector<float>"   ,&photonPfIsoCharged02ForCicVtx0_);      
     myTree_->Branch("photonid_sieie",                 "vector<float>"   ,&photonid_sieie_);
     myTree_->Branch("photonid_sieip",                 "vector<float>"   ,&photonid_sieip_);
     myTree_->Branch("photonid_etawidth",              "vector<float>"   ,&photonid_etawidth_);
@@ -2961,17 +3004,21 @@ void PATZJetsExpress::buildTree()
     myTree_->Branch("photonid_hadronicOverEm",          "vector<float>"   ,&photonid_hadronicOverEm_);
     myTree_->Branch("photonid_hadronicOverEm2012",          "vector<float>"   ,&photonid_hadronicOverEm2012_);
     myTree_->Branch("photonhcalTowerSumEtConeDR04",          "vector<float>"   ,&photonhcalTowerSumEtConeDR04_);
+    myTree_->Branch("photonhcalTowerSumEtConeDR03",          "vector<float>"   ,&photonhcalTowerSumEtConeDR03_);
     myTree_->Branch("photonecalRecHitSumEtConeDR04",          "vector<float>"   ,&photonecalRecHitSumEtConeDR04_);
     myTree_->Branch("photonnTrkSolidConeDR04",          "vector<float>"   ,&photonnTrkSolidConeDR04_);
     myTree_->Branch("photontrkSumPtSolidConeDR04",          "vector<float>"   ,&photontrkSumPtSolidConeDR04_);
     myTree_->Branch("photonnTrkHollowConeDR04",          "vector<float>"   ,&photonnTrkHollowConeDR04_);
     myTree_->Branch("photontrkSumPtHollowConeDR04",          "vector<float>"   ,&photontrkSumPtHollowConeDR04_);
+    myTree_->Branch("photontrkSumPtHollowConeDR03",          "vector<float>"   ,&photontrkSumPtHollowConeDR03_);
     myTree_->Branch("photonIsoFPRCharged",          "vector<float>"   ,&photonIsoFPRCharged_);
     myTree_->Branch("photonIsoFPRNeutral",          "vector<float>"   ,&photonIsoFPRNeutral_);
     myTree_->Branch("photonIsoFPRPhoton",          "vector<float>"   ,&photonIsoFPRPhoton_);
     myTree_->Branch("photonIsoFPRRandomConeCharged",          "vector<float>"   ,&photonIsoFPRRandomConeCharged_);
     myTree_->Branch("photonIsoFPRRandomConeNeutral",          "vector<float>"   ,&photonIsoFPRRandomConeNeutral_);
     myTree_->Branch("photonIsoFPRRandomConePhoton",          "vector<float>"   ,&photonIsoFPRRandomConePhoton_);
+    myTree_->Branch("photonIsoFPRRandomConeEta",          "vector<float>"   ,&photonIsoFPRRandomConeEta_);
+    myTree_->Branch("photonIsoFPRRandomConePhi",          "vector<float>"   ,&photonIsoFPRRandomConePhi_);
     myTree_->Branch("photonBit","vector<int>",&photonBit_ );
   }
     myTree_->Branch("TriMatchF4Path_photon"          ,"vector<int>"     ,&TriMatchF4Path_photon_);
@@ -3159,6 +3206,7 @@ void PATZJetsExpress::clearTree()
   photonPfIsoPhotons04ForCic_  ->clear();
   photonPfIsoNeutrals04ForCic_ ->clear();
   // chiara
+  photonPfIsoCharged02ForCicVtx0_ ->clear();
   photonPfIsoCharged03ForCicVtx0_ ->clear();
   photonPfIsoCharged04ForCicVtx0_ ->clear();
   photonPfIsoCharged03BadForCic_  ->clear();
@@ -3176,17 +3224,21 @@ void PATZJetsExpress::clearTree()
   photonid_hadronicOverEm_        ->clear();
   photonid_hadronicOverEm2012_    ->clear();
   photonhcalTowerSumEtConeDR04_   ->clear();
+  photonhcalTowerSumEtConeDR03_   ->clear();
   photonecalRecHitSumEtConeDR04_  ->clear();
   photonnTrkSolidConeDR04_        ->clear();
   photontrkSumPtSolidConeDR04_    ->clear();
   photonnTrkHollowConeDR04_       ->clear();
   photontrkSumPtHollowConeDR04_   ->clear();
+  photontrkSumPtHollowConeDR03_   ->clear();
   photonIsoFPRCharged_            ->clear();
   photonIsoFPRNeutral_            ->clear();
   photonIsoFPRPhoton_             ->clear();
   photonIsoFPRRandomConeCharged_            ->clear();
   photonIsoFPRRandomConeNeutral_            ->clear();
   photonIsoFPRRandomConePhoton_             ->clear();
+  photonIsoFPRRandomConeEta_             ->clear();
+  photonIsoFPRRandomConePhi_             ->clear();
   TriMatchF4Path_photon_          ->clear();
 
 

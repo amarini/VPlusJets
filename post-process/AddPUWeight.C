@@ -7,6 +7,8 @@
 #include <stdlib.h>
 
 #include <string>
+#include <iostream>
+#include "TMath.h"
 using namespace std;
 
 //#include "pileup_Data_v2.C"
@@ -79,14 +81,21 @@ int AddPUWeight(	const char * FileName="ntuple.root", //File name
 	//Getting the Number of entries in the tree
 	long long int NumberEntries=t->GetEntries();
 	//looping on the entries in order to add the correct number of entries in the branch
+	long long int NE30=NumberEntries/30.;
 	for(long long int i=0;i<NumberEntries;i++){
-		t->GetEntry(i);
+		t->GetEntry(i);	
+		if( i%NE30  == 0 )	 //print progress bar
+			{
+			int j;
+			cout<<"[";for(j=0;j< i/NE30;j++)cout<<"="; for(;j<30;j++)cout<<" "; cout<<"] "<< Form("%.0f",float(i)/float(NumberEntries) * 100)<<"%\r";cout.flush();
+			}
 		if(PU->GetBinContent(PU->FindBin(puINT))==0) PUWeight=0;
 		PUWeight = eventWeight*(double)pileup->GetBinContent(pileup->FindBin(puINT))/(double)PU->GetBinContent(PU->FindBin(   TMath::Max(puINT,0)   ));
 		
 		//cerr<<PUWeight<<endl;
 		b->Fill();
 		}
+	cout<<endl;
 	//Write the Tree (With OverWrite Option)
 	t->Write("",TObject::kOverwrite);
 	//Close the file
