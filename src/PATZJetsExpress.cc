@@ -1815,21 +1815,22 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  // --- PF isolation ---
 	  unsigned int ivtx = 0;
 	  VertexRef myVtxRef(vertices_, ivtx);
+	  edm::Ptr<Vertex>  VtxPtr(vertices_,ivtx);
 	 
 	  //MP ISO
 	  //SuperClusterFootprintRemoval remover(iEvent,edm::ParameterSet(),iSetup); 
 	  SuperClusterFootprintRemoval remover(iEvent,iSetup,edm::ParameterSet()); //V01-00
+	  
+	  PFIsolation_struct FPR_out = remover.PFIsolation(it->superCluster(),  VtxPtr);
+	  float photonIsoFPRCharged = FPR_out.chargediso;//remover.PFIsolation("charged",it->superCluster(),0);
+	  float photonIsoFPRNeutral = FPR_out.neutraliso;//remover.PFIsolation("neutral",it->superCluster());
+	  float photonIsoFPRPhoton  = FPR_out.photoniso;//remover.PFIsolation("photon",it->superCluster());
 
-	  float photonIsoFPRCharged = remover.PFIsolation("charged",it->superCluster(),0);
-	  float photonIsoFPRNeutral = remover.PFIsolation("neutral",it->superCluster());
-	  float photonIsoFPRPhoton = remover.PFIsolation("photon",it->superCluster());
-
-	  PFIsolation_RandomCone_struct FPR_RC_out = remover.RandomConeIsolation(it->superCluster(),0); // V01-01 / will break at V01-02 because wants a pointer to the Vtx
-	  float photonIsoFPRRandomConeCharged = FPR_RC_out.chargediso; //remover.RandomConeIsolation("charged",it->superCluster(),0);
-	  float photonIsoFPRRandomConeNeutral = FPR_RC_out.neutraliso; //remover.RandomConeIsolation("neutral",it->superCluster());
-	  float photonIsoFPRRandomConePhoton  = FPR_RC_out.photoniso; //remover.RandomConeIsolation("photon",it->superCluster());
-	  float photonIsoFPRRandomConeEta     = FPR_RC_out.randomcone_eta;
-	  float photonIsoFPRRandomConePhi     = FPR_RC_out.randomcone_phi; // if RC is not ok, everything is -999
+	  float photonIsoFPRRandomConeCharged = FPR_out.chargediso_rcone; //remover.RandomConeIsolation("charged",it->superCluster(),0);
+	  float photonIsoFPRRandomConeNeutral = FPR_out.neutraliso_rcone; //remover.RandomConeIsolation("neutral",it->superCluster());
+	  float photonIsoFPRRandomConePhoton  = FPR_out.photoniso_rcone; //remover.RandomConeIsolation("photon",it->superCluster());
+	  float photonIsoFPRRandomConeEta     = FPR_out.eta_rcone;
+	  float photonIsoFPRRandomConePhi     = FPR_out.phi_rcone; // if RC is not ok, everything is -999
 
 	  // chiara: ma va fatto cosi'? c'era gia'
 	  isolator.fGetIsolation((&*it),pfCandidates.product(), myVtxRef, vertices_);

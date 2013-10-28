@@ -204,7 +204,7 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
     GENType         = cms.int32(0), #
     processName     = cms.string('HLT'),
     ##SuperCluster Foot Print Removal
-    tag_Jets_forSCremoval = cms.InputTag('jetExtender','extendedPatJets'),
+    tag_jets        = cms.InputTag('jetExtender','extendedPatJets'),
     #isolation_cone_size_forSCremoval = cms.double(0.4),#default=0.4 
 
     triggerName     = cms.vstring('HLT_DoubleMu7_v',
