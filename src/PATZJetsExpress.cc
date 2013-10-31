@@ -134,6 +134,7 @@
 #include <sys/stat.h>
 #include "CLHEP/Random/RandGauss.h"
 
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
 //STD
 #include <exception>
 //
@@ -182,8 +183,10 @@ class PATZJetsExpress : public edm::EDAnalyzer {
         
         // --- Foot print removal isolation
         float isoFPRNeutral;
+        float isoFPRChargedVtx0;
         float isoFPRCharged;
         float isoFPRPhoton;
+	float isoFPRRandomConeChargedVtx0;
 	float isoFPRRandomConeCharged;
 	float isoFPRRandomConeNeutral;
 	float isoFPRRandomConePhoton;
@@ -281,6 +284,11 @@ class PATZJetsExpress : public edm::EDAnalyzer {
 
         // ---- qgl ----------------------------------------------------
         float qgl;
+        // ---- pu ----------------------------------------------------
+        float puid;
+        float puidmva;
+	int   puidflags; // BIT: 001 = loose ; 010/2 medium ; 100/4= tight
+	int   puidflagsmva; // BIT: 001 = loose ; 010/2 medium ; 100/4= tight
         // ---- rms ----------------------------------------------------
         float rms;
         // ---- veto ---------------------------------------------------
@@ -461,10 +469,12 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float>* photontrkSumPtHollowConeDR03_;
       vector<float>* photonPfIsoCharged02ForCicVtx0_;
       //PhotonIso
-      vector<float>* photonIsoFPRCharged_; //with FOOT PRINT REMOVAL FROM MP
+      vector<float>* photonIsoFPRChargedVtx0_; 
+      vector<float>* photonIsoFPRCharged_; 
       vector<float>* photonIsoFPRNeutral_;
       vector<float>* photonIsoFPRPhoton_;
-      vector<float>* photonIsoFPRRandomConeCharged_; //with FOOT PRINT REMOVAL FROM MP
+      vector<float>* photonIsoFPRRandomConeChargedVtx0_; 
+      vector<float>* photonIsoFPRRandomConeCharged_; 
       vector<float>* photonIsoFPRRandomConeNeutral_;
       vector<float>* photonIsoFPRRandomConePhoton_;
       
@@ -509,6 +519,9 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       // ---- other jet properties --------------------------------------
       vector<float> *jetBeta_,*jetBtag_,*jetTagInfoNVtx_,*jetTagInfoNTracks_,*jetTagInfoVtxMass_,*jetArea_,*jetJEC_,*jetUNC_,*jetQGL_,*jetRMS_;
       vector<int> *jetVeto_, *jetMCFlavour_;
+      // ---- pu id
+      vector<float>*jetPuId_,*jetPuIdMva_;
+      vector<int>*jetPuIdFlags_,*jetPuIdFlagsMva_;
       // ---- QG ----
       //vector<float> *QGVars_;
 	float rhoQG_;
@@ -1822,10 +1835,12 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  SuperClusterFootprintRemoval remover(iEvent,iSetup,edm::ParameterSet()); //V01-00
 	  
 	  PFIsolation_struct FPR_out = remover.PFIsolation(it->superCluster(),  VtxPtr);
+	  float photonIsoFPRChargedVtx0 = FPR_out.chargediso_primvtx;//remover.PFIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRCharged = FPR_out.chargediso;//remover.PFIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRNeutral = FPR_out.neutraliso;//remover.PFIsolation("neutral",it->superCluster());
 	  float photonIsoFPRPhoton  = FPR_out.photoniso;//remover.PFIsolation("photon",it->superCluster());
 
+	  float photonIsoFPRRandomConeChargedVtx0 = FPR_out.chargediso_primvtx_rcone; //remover.RandomConeIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRRandomConeCharged = FPR_out.chargediso_rcone; //remover.RandomConeIsolation("charged",it->superCluster(),0);
 	  float photonIsoFPRRandomConeNeutral = FPR_out.neutraliso_rcone; //remover.RandomConeIsolation("neutral",it->superCluster());
 	  float photonIsoFPRRandomConePhoton  = FPR_out.photoniso_rcone; //remover.RandomConeIsolation("photon",it->superCluster());
@@ -2082,9 +2097,11 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	  gamma.parameters[PARTICLE::trkSumPtHollowConeDR03]=trkSumPtHollowConeDR03;
 	  gamma.parameters[PARTICLE::hcalTowerSumEtConeDR03]=hcalTowerSumEtConeDR03;
 	  gamma.isoFPRCharged=photonIsoFPRCharged ;
+	  gamma.isoFPRChargedVtx0=photonIsoFPRChargedVtx0 ;
 	  gamma.isoFPRNeutral=photonIsoFPRNeutral ;
 	  gamma.isoFPRPhoton=photonIsoFPRPhoton ;
 	  gamma.isoFPRRandomConeCharged=photonIsoFPRRandomConeCharged;
+	  gamma.isoFPRRandomConeChargedVtx0=photonIsoFPRRandomConeChargedVtx0;
 	  gamma.isoFPRRandomConeNeutral=photonIsoFPRRandomConeNeutral;
 	  gamma.isoFPRRandomConePhoton=photonIsoFPRRandomConePhoton;
 	  gamma.isoFPRRandomConeEta=photonIsoFPRRandomConeEta;
@@ -2238,40 +2255,37 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       int npr   = i_jet->chargedMultiplicity() + i_jet->neutralMultiplicity();
       bool id = (npr>1 && phf<0.99 && nhf<0.99 && ((fabs(i_jet->eta())<=2.4 && nhf<0.9 && phf<0.9 && elf<0.99 && chf>0 && chm>0) || fabs(i_jet->eta())>2.4));
       float rms=TMath::Sqrt( TMath::Power(i_jet->userFloat("axis1"),2) + TMath::Power(i_jet->userFloat("axis2"),2) );
+    // ----------- PU ID ------------------- 
+    	Handle<ValueMap<float> > puJetIdMva;
+	iEvent.getByLabel("fullDiscriminant",puJetIdMva);
+
+	Handle<ValueMap<int> > puJetIdFlagMva;
+	iEvent.getByLabel("fullId",puJetIdMva);
+	
+    	Handle<ValueMap<float> > puJetId;
+	iEvent.getByLabel("cutbasedDiscriminant",puJetId);
+
+	Handle<ValueMap<int> > puJetIdFlag;
+	iEvent.getByLabel("cutbasedId",puJetId);
+
+	int puidflags=0;
+	int puidflagsmva=0;
+
+	float puidmva=(*puJetIdMva)[jets->refAt(index)];
+	int   idflag = (*puJetIdFlagMva)[jets->refAt(index)]; // flag are already something like binery selection . It is rewritten because they can change interface
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflagsmva|=1;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflagsmva|=2;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflagsmva|=4;}
+
+
+	float puid=(*puJetId)[jets->refAt(index)];
+	idflag = (*puJetIdFlag)[jets->refAt(index)];
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflags|=1;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflags|=2;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflags|=4;}
+
       if (!id) jetIsIDed = false;
-      // ---- jet vertex association --------------------------------------
-      // ---- get the vector of tracks ------------------------------------ 
-      //reco::TrackRefVector vTrks(i_jet->getTrackRefs());
-      //float sumTrkPt(0.0),sumTrkPtBeta(0.0),sumTrkPtBetaStar(0.0),beta(-1.0),betaStar(-1.0);
-      // ---- loop over the tracks of the jet -----------------------------
-      /*
-	for(reco::TrackRefVector::const_iterator i_trk = vTrks.begin(); i_trk != vTrks.end(); i_trk++) {
-	sumTrkPt += (*i_trk)->pt();
-	// ---- loop over all vertices ------------------------------------
-	for(unsigned i_vtx = 0;i_vtx < vertices_->size();i_vtx++) {
-        // ---- loop over the tracks associated with the vertex ---------
-        if ((*vertices_)[i_vtx].isFake() || (*vertices_)[i_vtx].ndof() < 4) continue; 
-        for(reco::Vertex::trackRef_iterator i_vtxTrk = (*vertices_)[i_vtx].tracks_begin(); i_vtxTrk != (*vertices_)[i_vtx].tracks_end(); ++i_vtxTrk) {
-	// ---- match the jet track to the track from the vertex ------
-	reco::TrackRef trkRef(i_vtxTrk->castTo<reco::TrackRef>());
-	// ---- check if the tracks match -----------------------------
-	if (trkRef == (*i_trk)) {
-	if (i_vtx == 0) {
-	sumTrkPtBeta += (*i_trk)->pt();
-	}
-	else {
-	sumTrkPtBetaStar += (*i_trk)->pt();
-	}   
-	continue;
-	}
-        }
-	}// vertices loop 
-	}// jet tracks loop
-	if (sumTrkPt > 0) {
-	beta     = sumTrkPtBeta/sumTrkPt;
-	betaStar = sumTrkPtBetaStar/sumTrkPt;
-	}
-      */
+
       JET aJet; 
       aJet.p4       = jetP4;
       aJet.jec      = jec;
@@ -2296,10 +2310,15 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       aJet.taginfoNtracks = taginfoNtracks;
       aJet.taginfoVtxMass = taginfoVtxMass;
       aJet.mcflavour      = mcflavour;
+      aJet.puid		= puid;
+      aJet.puidmva	= puidmva;
+      aJet.puidflags	= puidflags;
+      aJet.puidflagsmva	= puidflagsmva;
       //if(jetIsDuplicate){aJet.p4       = jetP4; myRJets.push_back(aJet);}  // store the uncorrected jet (this is virtually the matched lepton in DR) 
     Handle<double> rhoQG;
     iEvent.getByLabel(mSrcRhoQG,rhoQG);
     //kt6PFJetsIsoQG
+	
 //
       if( jetIsInAcceptance && jetIsIDed){ //store QG Variable for myJets
 	vector<float> *QGvars=ComputeQGVariables(i_jet,iEvent,index);
@@ -2542,9 +2561,11 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	
 	photonBit_->push_back(myPhotons[gg].bit);
 	photonIsoFPRCharged_->push_back(myPhotons[gg].isoFPRCharged);
+	photonIsoFPRChargedVtx0_->push_back(myPhotons[gg].isoFPRChargedVtx0);
 	photonIsoFPRNeutral_->push_back(myPhotons[gg].isoFPRNeutral);
 	photonIsoFPRPhoton_->push_back(myPhotons[gg].isoFPRPhoton);
 	photonIsoFPRRandomConeCharged_->push_back(myPhotons[gg].isoFPRRandomConeCharged);
+	photonIsoFPRRandomConeChargedVtx0_->push_back(myPhotons[gg].isoFPRRandomConeChargedVtx0);
 	photonIsoFPRRandomConeNeutral_->push_back(myPhotons[gg].isoFPRRandomConeNeutral);
 	photonIsoFPRRandomConePhoton_->push_back(myPhotons[gg].isoFPRRandomConePhoton);
 	photonIsoFPRRandomConeEta_->push_back(myPhotons[gg].isoFPRRandomConeEta);
@@ -2584,6 +2605,11 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
         jetRMS_     ->push_back(myJets[j].rms);
         jetVeto_     ->push_back(myJets[j].veto);
 	jetPdgId_->push_back(myJets[j].pdgId);
+	//PU ID
+	jetPuId_->push_back(myJets[j].puid);
+	jetPuIdMva_->push_back(myJets[j].puidmva);
+	jetPuIdFlags_->push_back(myJets[j].puidflags);
+	jetPuIdFlagsMva_->push_back(myJets[j].puidflagsmva);
 
 	jetQGMLP_->push_back(myJets[j].qgMLP);
 	//jetQG_axis1_L_->push_back(myJets[j].QG_axis1_L);
@@ -2896,6 +2922,11 @@ void PATZJetsExpress::buildTree()
   jetllDPhiGEN_      = new std::vector<float>();
   jetllDPhi_         = new std::vector<float>();
   jetPhotonDPhi_     = new std::vector<float>();
+  //PU ID
+  jetPuId_	     = new std::vector<float>();
+  jetPuIdMva_	     = new std::vector<float>();
+  jetPuIdFlags_	     = new std::vector<int>();
+  jetPuIdFlagsMva_   = new std::vector<int>();
 
   photonPt_= new std::vector<float>();
   photonE_= new std::vector<float>();
@@ -2935,9 +2966,11 @@ void PATZJetsExpress::buildTree()
   photonnTrkHollowConeDR04_= new std::vector<float>();
   photontrkSumPtHollowConeDR04_= new std::vector<float>();
   photontrkSumPtHollowConeDR03_= new std::vector<float>();
+  photonIsoFPRChargedVtx0_ = new std::vector<float>();
   photonIsoFPRCharged_ = new std::vector<float>();
   photonIsoFPRNeutral_ = new std::vector<float>();
   photonIsoFPRPhoton_ = new std::vector<float>();
+  photonIsoFPRRandomConeChargedVtx0_ = new std::vector<float>();
   photonIsoFPRRandomConeCharged_ = new std::vector<float>();
   photonIsoFPRRandomConeNeutral_ = new std::vector<float>();
   photonIsoFPRRandomConePhoton_ = new std::vector<float>();
@@ -3012,9 +3045,11 @@ void PATZJetsExpress::buildTree()
     myTree_->Branch("photonnTrkHollowConeDR04",          "vector<float>"   ,&photonnTrkHollowConeDR04_);
     myTree_->Branch("photontrkSumPtHollowConeDR04",          "vector<float>"   ,&photontrkSumPtHollowConeDR04_);
     myTree_->Branch("photontrkSumPtHollowConeDR03",          "vector<float>"   ,&photontrkSumPtHollowConeDR03_);
+    myTree_->Branch("photonIsoFPRChargedVtx0",          "vector<float>"   ,&photonIsoFPRChargedVtx0_);
     myTree_->Branch("photonIsoFPRCharged",          "vector<float>"   ,&photonIsoFPRCharged_);
     myTree_->Branch("photonIsoFPRNeutral",          "vector<float>"   ,&photonIsoFPRNeutral_);
     myTree_->Branch("photonIsoFPRPhoton",          "vector<float>"   ,&photonIsoFPRPhoton_);
+    myTree_->Branch("photonIsoFPRRandomConeChargedVtx0",          "vector<float>"   ,&photonIsoFPRRandomConeChargedVtx0_);
     myTree_->Branch("photonIsoFPRRandomConeCharged",          "vector<float>"   ,&photonIsoFPRRandomConeCharged_);
     myTree_->Branch("photonIsoFPRRandomConeNeutral",          "vector<float>"   ,&photonIsoFPRRandomConeNeutral_);
     myTree_->Branch("photonIsoFPRRandomConePhoton",          "vector<float>"   ,&photonIsoFPRRandomConePhoton_);
@@ -3080,6 +3115,10 @@ void PATZJetsExpress::buildTree()
   myTree_->Branch("jetJEC"           ,"vector<float>"     ,&jetJEC_);
   myTree_->Branch("jetUNC"           ,"vector<float>"     ,&jetUNC_);
   myTree_->Branch("jetllDPhi"        ,"vector<float>"     ,&jetllDPhi_);
+  myTree_->Branch("jetPuId"          ,"vector<float>"     ,&jetPuId_);
+  myTree_->Branch("jetPuIdMva"       ,"vector<float>"     ,&jetPuIdMva_);
+  myTree_->Branch("jetPuIdFlags"     ,"vector<int>"     ,&jetPuIdFlags_);
+  myTree_->Branch("jetPuIdFlagsMva"  ,"vector<int>"     ,&jetPuIdFlagsMva_);
   //-----forward jets - two leading forward jets
   myTree_->Branch("fwjetPt"          ,"vector<float>"     ,&fwjetPt_);
   myTree_->Branch("fwjetPtRES"       ,"vector<float>"     ,&fwjetPtRES_);
@@ -3233,13 +3272,15 @@ void PATZJetsExpress::clearTree()
   photontrkSumPtHollowConeDR04_   ->clear();
   photontrkSumPtHollowConeDR03_   ->clear();
   photonIsoFPRCharged_            ->clear();
+  photonIsoFPRChargedVtx0_        ->clear();
   photonIsoFPRNeutral_            ->clear();
   photonIsoFPRPhoton_             ->clear();
-  photonIsoFPRRandomConeCharged_            ->clear();
-  photonIsoFPRRandomConeNeutral_            ->clear();
-  photonIsoFPRRandomConePhoton_             ->clear();
-  photonIsoFPRRandomConeEta_             ->clear();
-  photonIsoFPRRandomConePhi_             ->clear();
+  photonIsoFPRRandomConeCharged_  ->clear();
+  photonIsoFPRRandomConeChargedVtx0_->clear();
+  photonIsoFPRRandomConeNeutral_  ->clear();
+  photonIsoFPRRandomConePhoton_   ->clear();
+  photonIsoFPRRandomConeEta_      ->clear();
+  photonIsoFPRRandomConePhi_      ->clear();
   TriMatchF4Path_photon_          ->clear();
 
 
@@ -3303,6 +3344,10 @@ void PATZJetsExpress::clearTree()
   jetUNC_            ->clear();
   jetllDPhi_         ->clear();
   jetVeto_           ->clear();
+  jetPuId_            ->clear();
+  jetPuIdMva_            ->clear();
+  jetPuIdFlags_            ->clear();
+  jetPuIdFlagsMva_            ->clear();
   fwjetPt_           ->clear();
   fwjetPtRES_        ->clear();
   fwjetPtRESup_      ->clear();

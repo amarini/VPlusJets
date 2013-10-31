@@ -61,45 +61,27 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(1))
+
 # ---- define the source ------------------------------------------------
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 'file:/data/sandro/Analisi/GammaJets/CMSSW_5_3_6xxx2013_06_03_TriMatch/CMSSW_5_3_6/src/amarini/VPlusJets/test/input_DYJetsToLL_M-50_Summer12.root'
-#'file:/data/sandro/Analisi/GammaJets/CMSSW_5_3_6xxx2013_06_03_TriMatch/CMSSW_5_3_6/src/amarini/VPlusJets/test/input_Photon_Run2012A-22Jan2013-v1_AOD.root'
-#'file:/scratch0/webermat/DYJets_MadGraph_START_53_V7A.root'
-#'file:/scratch0/webermat/QCD_HT1000toInf_8TeV_madgraph_Summer12.root'
-#'file:pickevents.root'
-#'file:/scratch0/webermat/GJets_HT_200To400_8TeV_madgraph.root'
-#'/store/relval/CMSSW_5_3_6-START53_V14/RelValProdTTbar/AODSIM/v2/00000/76ED0FA6-1E2A-E211-B8F1-001A92971B72.root'
-#'/store/relval/CMSSW_5_3_6-START53_V14/RelValH130GGgluonfusion/GEN-SIM-RECO/v2/00000/202DD4DB-F929-E211-8F53-001A92810AF2.root'
-#'/store/data/Run2012B/DoubleMu/AOD/PromptReco-v1/000/193/752/504D95A3-789B-E111-9B6C-003048D3C944.root', 
-#'/store/data/Run2012C/DoubleMu/AOD/24Aug2012-v1/00000/FE2746F7-5AEF-E111-8B40-E0CB4E29C4E5.root'
     )
 )
-###########################QGL TAGGER 2012
-#process.kt6PFJetsForIso = process.kt6PFJets.clone( rParam = 0.6, doRhoFastjet = True )
-#process.kt6PFJetsForIso.Rho_EtaMax = cms.double(2.5)
-#process.qglAK5PF   = cms.EDProducer("QuarkGluonTagger2012",
-#            jets     = cms.InputTag('jetExtender','extendedPatJets'),
-#            rho      = cms.InputTag('kt6PFJetsForIso','rho'),
-#            jec      = cms.string('ak5PFL1FastL2L3'),
-#            isPatJet = cms.bool(True)
-#  )
 
+# load the PU JetID sequence
+process.load("CMGTools.External.pujetidsequence_cff")
+#change jet type to our
+process.puJetId.jets = cms.InputTag("jetExtender",'extendedPatJets')
+process.puJetMva.jets = cms.InputTag("jetExtender",'extendedPatJets')
+
+# load QGL Tagger
 process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff') 
 process.QGTagger.srcJets = cms.InputTag('jetExtender','extendedPatJets')
 #process.QGTagger.jecService     = cms.string('') #useless for pat or corrected jets
 process.QGTagger.dataDir        = cms.untracked.string("QuarkGluonTagger/EightTeV/data/")
 process.QGTagger.isPatJet = cms.untracked.bool(True)
-#process.qglAK5PF = cms.EDProducer("QuarkGluonTagger",
-#  jets           = cms.InputTag('jetExtender','extendedPatJets'),
-#  srcRho         = cms.InputTag('kt6PFJets','rho'),
-#  srcRhoIso      = cms.InputTag('kt6PFJetsForIso','rho'),
-#  jecService     = cms.string(""), #useless for pat
-#  dataDir        = cms.string("QuarkGluonTagger/EightTeV/data/"),
-#  useCHS         = cms.bool(False),
-#  isPatJet       = cms.bool(True)
-#)
+
 
 ##--------- remove MC matching -----------------
 if not isMC:
@@ -516,7 +498,7 @@ process.p = cms.Path(process.pfParticleSelectionSequence
 
 if(isMC):
 	process.p += process.genParticlesForJets
-process.tail = cms.Sequence(process.patDefaultSequence + process.jetExtender + process.QuarkGluonTagger + process.accepted)
+process.tail = cms.Sequence(process.patDefaultSequence + process.jetExtender + process.puJetId + process.puJetMva + process.QuarkGluonTagger + process.accepted)
 
 process.p += process.tail
 

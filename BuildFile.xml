@@ -12,5 +12,6 @@
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="RecoEgamma/EgammaElectronAlgos"/>
 <use name="PFIsolation/SCFootprintRemoval"/>
+<use name="CMGTools/External"/>
 <use name="clhep"/>
 <flags   EDM_PLUGIN="1"/>
