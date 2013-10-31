@@ -10,6 +10,29 @@
 # V01-05 bug fix for RC
 cd $CMSSW_BASE/src
 mkdir PFIsolation; cd PFIsolation; git clone https://github.com/peruzzim/SCFootprintRemoval.git ; cd SCFootprintRemoval ; git checkout V01-05 ;
+#------------------PATCH TO HAVE 20 - 30 in RC isolation-----------------------------------------------#
+cd $CMSSW_BASE/src/PFIsolation/SCFootprintRemoval/src
+patch SuperClusterFootprintRemoval.cc <<EOF
+--- SuperClusterFootprintRemoval.cc	2013-10-31 11:21:39.000000000 +0100
++++ /afs/cern.ch/user/a/amarini/work/ProductionAugust2013/CMSSW_5_3_9/src/PFIsolation/SCFootprintRemoval/src/SuperClusterFootprintRemoval.cc	2013-10-29 11:42:04.000000000 +0100
+@@ -400,13 +400,13 @@
+   bool found=false;
+ 
+   for (reco::PFJetCollection::const_iterator jet=jetHandle->begin(); jet!=jetHandle->end(); jet++){
+-    if (jet->pt()<20) continue;
++    if (jet->pt()<30) continue;
+     float dR = reco::deltaR(eta,phi,jet->eta(),jet->phi());
+     if (dR<mindR) found=true;
+   }
+ 
+   for (reco::PhotonCollection::const_iterator pho=photonHandle->begin(); pho!=photonHandle->end(); pho++){
+-    if (pho->pt()<10) continue;
++    if (pho->pt()<20) continue;
+     float dR = reco::deltaR(eta,phi,pho->eta(),pho->phi());
+     if (dR<mindR) found=true;
+   }
+EOF
+##################
 
 ## PU Jet ID
 cd $CMSSW_BASE/src
