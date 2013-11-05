@@ -43,6 +43,7 @@ for file in fileList:
 		if options.delete:
 			call(["rm","-v",file])
 
+
 if options.merge:
 	dir=options.dir
 	if dir[-1]=="/":
@@ -52,9 +53,23 @@ if options.merge:
 	cmd=["hadd",target]
 	for i in glob(options.dir+"/*.root"):
 		cmd.append(i)
-	call(cmd)
+	if( len(cmd) > 1000): 
+		print "POSSIBLE ERROR - to many files - macro needs to be checked"
+		ListToMerge=glob(options.dir+"/*.root")
+		
+		n=450
+		for i in xrange(0, len(ListToMerge), n):
+        		PartialList=l[i:i+n]	
+			if i==0: 
+				cmd = ["mkdir",options.dir+"/merge_tmp/"]
+				call(cmd)
+			cmd=["hadd",options.dir+"/merge_tmp/file_%d.root"%(i)] + PartialList
+			call(cmd)
+		cmd=["hadd",target]+glob(options.dir+"/merge_tmp/file*.root")	
+		call(cmd)
+	else:
+		call(cmd)
 
-	if( len(cmd) > 1000): print "POSSIBLE ERROR - to many files"
 
 if options.verbose:	
 	print "------DATABASE------"
