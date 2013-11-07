@@ -59,7 +59,7 @@ int Usage(const char *progName){
 	printf("             - pu 0: add Cross Section Weights  And PUWeight. Pileupfile is pileup/all.json.pileup.root\n");
 	printf("             - pu 1: add PUWeight+1s. Pileupfile is pileup/all.json.pileup_UP.root\n");
 	printf("             - pu -1: add PUWeight-1s. Pileupfile is pileup/all.json.pileup_DN.root\n");
-	printf("             - pu 5: Do pu 0 + HLT PUWeights\n");
+	printf("             - pu 5: Do pu 0 + 1 + -1 + HLT PUWeights\n");
 	printf("             - pu 6: HLT PUWeights\n");
 	printf("             - pu 10: add PUWeight \n");
 	printf("             - pu 100: add RDWeights \n");

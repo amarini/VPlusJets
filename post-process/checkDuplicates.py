@@ -44,9 +44,9 @@ for file in fileList:
 			call(["rm","-v",file])
 
 #find max in database
-Max=max(Database.keys(), key=int)
+Max=max(Database.keys())
 print "Total N. Of jobs is " + str(Max)
-for i in range(0,Max+1):
+for i in range(1,Max+1):
 	try: Database[i]
 	except KeyError: print "--> Job "+str(i)+" is missing"
 

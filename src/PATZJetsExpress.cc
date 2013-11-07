@@ -2256,33 +2256,36 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       bool id = (npr>1 && phf<0.99 && nhf<0.99 && ((fabs(i_jet->eta())<=2.4 && nhf<0.9 && phf<0.9 && elf<0.99 && chf>0 && chm>0) || fabs(i_jet->eta())>2.4));
       float rms=TMath::Sqrt( TMath::Power(i_jet->userFloat("axis1"),2) + TMath::Power(i_jet->userFloat("axis2"),2) );
     // ----------- PU ID ------------------- 
-    	Handle<ValueMap<float> > puJetIdMva;
-	iEvent.getByLabel("fullDiscriminant",puJetIdMva);
+    	//Handle<ValueMap<float> > puJetIdMva;
+	//iEvent.getByLabel("fullDiscriminant",puJetIdMva);
 
-	Handle<ValueMap<int> > puJetIdFlagMva;
-	iEvent.getByLabel("fullId",puJetIdMva);
+	//Handle<ValueMap<int> > puJetIdFlagMva;
+	//iEvent.getByLabel("fullId",puJetIdFlagMva);
 	
-    	Handle<ValueMap<float> > puJetId;
-	iEvent.getByLabel("cutbasedDiscriminant",puJetId);
+    	//Handle<ValueMap<float> > puJetId;
+	//iEvent.getByLabel("cutbasedDiscriminant",puJetId);
 
-	Handle<ValueMap<int> > puJetIdFlag;
-	iEvent.getByLabel("cutbasedId",puJetId);
+	//Handle<ValueMap<int> > puJetIdFlag;
+	//iEvent.getByLabel("cutbasedId",puJetIdFlag);
 
 	int puidflags=0;
 	int puidflagsmva=0;
+	int idflag=0;
+	
+	float puidmva=-1;
+	float puid=-1;
+	//float puidmva=(*puJetIdMva)[jets->refAt(index)];
+	//idflag = (*puJetIdFlagMva)[jets->refAt(index)]; // flag are already something like binery selection . It is rewritten because they can change interface
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflagsmva|=1;}
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflagsmva|=2;}
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflagsmva|=4;}
 
-	float puidmva=(*puJetIdMva)[jets->refAt(index)];
-	int   idflag = (*puJetIdFlagMva)[jets->refAt(index)]; // flag are already something like binery selection . It is rewritten because they can change interface
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflagsmva|=1;}
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflagsmva|=2;}
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflagsmva|=4;}
 
-
-	float puid=(*puJetId)[jets->refAt(index)];
-	idflag = (*puJetIdFlag)[jets->refAt(index)];
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflags|=1;}
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflags|=2;}
-	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflags|=4;}
+	//float puid=(*puJetId)[jets->refAt(index)];
+	//idflag = (*puJetIdFlag)[jets->refAt(index)];
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflags|=1;}
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflags|=2;}
+	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflags|=4;}
 
       if (!id) jetIsIDed = false;
 

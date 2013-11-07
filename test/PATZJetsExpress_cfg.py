@@ -24,8 +24,8 @@ from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 #process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 if(isMC):
-	process.GlobalTag.globaltag = 'START53_V27::All'    # MC 53Y release > CMSSW_5_3_8_patch3
-	#process.GlobalTag.globaltag = 'START53_V26::All'    # MC 53Y release < CMSSW_5_3_8_patch3
+	#process.GlobalTag.globaltag = 'START53_V27::All'    # MC 53Y release > CMSSW_5_3_8_patch3
+	process.GlobalTag.globaltag = 'START53_V26::All'    # MC 53Y release < CMSSW_5_3_8_patch3
 else:
 	process.GlobalTag.globaltag = 'FT_53_V21_AN5::All'  # Winter13 2012 A, B, C, D datasets re-reco with CMSSW_5_3_7_patch6 
 	#-----------------2012 A, B, C, D datasets re-reco + prompt with CMSSW > 5_3_2 (official recommendation) 
@@ -498,7 +498,9 @@ process.p = cms.Path(process.pfParticleSelectionSequence
 
 if(isMC):
 	process.p += process.genParticlesForJets
-process.tail = cms.Sequence(process.patDefaultSequence + process.jetExtender + process.puJetId + process.puJetMva + process.QuarkGluonTagger + process.accepted)
+process.tail = cms.Sequence(process.patDefaultSequence + process.jetExtender + 
+		#process.puJetIdSqeuence + 
+		process.QuarkGluonTagger + process.accepted)
 
 process.p += process.tail
 

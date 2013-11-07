@@ -34,7 +34,7 @@ USER.se_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
 USER.ce_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
 USER.ui_working_dir = Mc
 #USER.storage_element = srm-eoscms.cern.ch
-#USER.storage_path=/srm/v2/server?SFN=/eos/cms/store/user/amarini/zjets_V00-12
+#USER.storage_path=/srm/v2/server?SFN=/eos/cms/store/user/amarini/zjets_V00-13
 USER.storage_element = T2_CH_CSCS 
 
 CMSSW.number_of_jobs = 500
@@ -55,7 +55,7 @@ else
 	echo "CMSSW.pset = PATZJetsExpress_cfg.py"
 fi
 #echo "USER.user_remote_dir = $(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
-echo "USER.user_remote_dir = zjets_V00_12/$(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
+echo "USER.user_remote_dir = zjets_V00_13/$(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
 echo 
 echo
 
