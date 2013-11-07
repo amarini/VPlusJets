@@ -16,11 +16,18 @@ random.seed()
 suffix="."+str(random.randint(0,10000))
 print "-- suffix is "+suffix+" --"
 
+user=os.environ['USER']
+
+import signal
+def signal_handler(signal, frame):
+        print 'You pressed Ctrl+C!'
+        sys.exit(0)
+
 def CrabStatus(dirName):
-	out=subprocess.call("crab -status -c "+dirName+" > /tmp/amarini/monitor.status"+suffix,shell=True)
+	out=subprocess.call("crab -status -c "+dirName+" > /tmp/"+user+"/monitor.status"+suffix,shell=True)
 
 def CrabGet(dirName):
-	out=subprocess.call("crab -get -c "+dirName+" > /tmp/amarini/monitor.get"+suffix,shell=True)
+	out=subprocess.call("crab -get -c "+dirName+" > /tmp/"+user+"/monitor.get"+suffix,shell=True)
 
 def Status(dirName):
 	Result={}
@@ -28,13 +35,13 @@ def Status(dirName):
 	#out=subprocess.check_output("crab -status -c "+dirName,shell=True)
 	#out,err = p.communicate()
 	CrabStatus(dirName)
-	return ReadStatus("/tmp/amarini/monitor.status"+suffix)
+	return ReadStatus("/tmp/"+user+"/monitor.status"+suffix)
 
 def FullStatus(dirName):
 	CrabStatus(dirName)
 	CrabGet(dirName)
 	CrabStatus(dirName)
-	return ReadStatus("/tmp/amarini/monitor.status"+suffix)
+	return ReadStatus("/tmp/"+user+"/monitor.status"+suffix)
 	
 
 def ReadStatus(txtName):
@@ -83,6 +90,25 @@ def Submit(jobList,dirName,Resubmit=False):
 	for i in range(0,len(jobList),450):
 		CallSubmit(jobList[i:i+450],dirName,Resubmit);
 
+def CallForceResubmit(jobList,dirName):
+	cmd=[]+preCommand
+	cmd += ['crab','-forceResubmit']
+	jobs=''
+	for iJob in jobList:
+		jobs=jobs+str(iJob)+','
+	#delete last
+	jobs=jobs[:-1]
+	cmd=cmd+[jobs,"-c",dirName]
+	cmd=cmd+submitOptions
+	subprocess.call(cmd)
+	print " -- GOING TO SLEEP FOR 60s --"
+	time.sleep(60)
+	print " -- WAKE UP --"
+
+def ForceResubmit(jobList,dirName):
+	for i in range(0,len(jobList),450):
+		CallForceResubmit(jobList[i:i+450],dirName);
+
 def SubmitAll(Result,dirName,Resubmit=True):
 	jobList=[]
 	for key in Result:
@@ -102,6 +128,13 @@ def ReSubmitCA(Result,dirName):
 		if Result[key]['status']=="Cancelled" or Result[key]['status']=='Aborted':
 			jobList.append(key)
 	Submit(jobList,dirName,True)
+
+def ForceReSubmitSubmitted(Result,dirName):
+	jobList=[]
+	for key in Result:
+		if Result[key]['status']=="Submitted":
+			jobList.append(key)
+	ForceResubmit(jobList,dirName)
 
 def PrintStatus(Result,dirName=""):
 	DONE=0
@@ -168,10 +201,22 @@ if __name__ == "__main__":
 	parser.add_option("-s","--submit",help="Submit jobs",dest='submit',default=False,action='store_true')
 	parser.add_option("-x","--extra",help="Extra Options for submit. E.g. '-GRID.se_black_list=T2;-GRID.ce_black..'",dest='extra',default='',type='string')
 	parser.add_option("-e","--exitNumber",help="Resubmit Exit 1,2,3 ...\nDefault=8020,8021,60317,60307,50664,50115,10034,8001,8022",dest='exit',default='8020,8021,60317,60307,50664,50115,10034,8001,8022,8028',type='string') 
+	parser.add_option("","--forceResubmitSubmittedJobs",help="Force Resubmition of jobs in status submitted",dest="forceResubmit",default=False,action='store_true')
 	(options,arg) = parser.parse_args()
 
 	if options.dryrun:
 		preCommand=["echo"]
+	
+	if options.forceResubmit and options.loop:
+		print "---> CANT LOOP ON FORCE RESUBMIT <---"
+		sys.exit(0)
+	
+	if options.forceResubmit:
+		pwd=random.randint(0,10000)
+		line=raw_input('You are going to force resubmit jobs: Enter %d to confirm: '%(pwd))
+		if int(line) != pwd:
+			print "you have entered '"+line+"' instead of '"+str(pwd)+"': Going to abort execution."
+			sys.exit(0)
 
 	if options.extra != '':
 		submitOptions=options.extra.split(';')
@@ -184,6 +229,9 @@ if __name__ == "__main__":
 		numList=[]
 	
 	#main loop
+	if options.loop:
+		signal.signal(signal.SIGINT, signal_handler)
+
 	while True:		
 		for dir in arg:
 			#CrabStatus(dir)
@@ -198,6 +246,14 @@ if __name__ == "__main__":
 			for exitStatus in numList:
 				print "-- Resubmit Exit "+str(exitStatus)+" --"
 				ReSubmitES(exitStatus,Results,dir)
-		if options.loop : time.sleep(15*60)
+
+			if options.forceResubmit:
+				ForceReSubmitSubmitted(Results,dir)
+				sys.exit(0)
+
+		if options.loop : 
+			print "--- GOING TO SLEEP ----"
+			time.sleep(15*60)
+			print "--- WAKE UP ----"
 		else: break;
 
