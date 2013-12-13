@@ -7,6 +7,33 @@
 #https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
 #Random cone
 
+get_git() ## usage get_git tag src dest
+{
+	cd $CMSSW_BASE/src
+        tag=$1 && shift
+        src=$1 && shift
+        dst=$1 && shift
+        wd=$(pwd)
+
+        echo
+        echo "Checking out $tag $src into $dst"
+
+        if [[ ! -d $dst ]]; then
+         git clone $src $dst
+        fi
+        cd $dst
+        git fetch origin
+        git checkout $tag
+        
+        cd $wd
+        echo "done"
+        echo
+        
+        packs="$packs $dst"
+}
+
+
+
 # V01-05 bug fix for RC
 cd $CMSSW_BASE/src
 mkdir PFIsolation; cd PFIsolation; git clone https://github.com/peruzzim/SCFootprintRemoval.git ; cd SCFootprintRemoval ; git checkout V01-05 ;
@@ -35,13 +62,23 @@ EOF
 ##################
 
 ## PU Jet ID
-cd $CMSSW_BASE/src
-mkdir CMGTools ;cd CMGTools ;git clone -b V00-03-04  git@github.com:h2gglobe/External  
+#cd $CMSSW_BASE/src
+#mkdir CMGTools ;cd CMGTools ;git clone -b V00-03-04  git@github.com:h2gglobe/External  
+get_git V00-03-04 https://github.com/h2gglobe/External.git CMGTools/External 
 
+##################
+
+## Energy Regression by Josh
+get_git hggpaperV6 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
+get_git hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools HiggsAnalysis/GBRLikelihoodEGTools
+#cd $CMSSW_BASE/src ;mkdir -p HiggsAnalysis ; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihood 
+#cd $CMSSW_BASE/src ; mkdir -p HiggsAnalysis; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools
 ########################### TO BE MOVED TO GIT ########################
 cd $CMSSW_BASE/src
 # are these related to H->gg variables?
 cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cd $CMSSW_BASE/src; 
+
 
 
 # 

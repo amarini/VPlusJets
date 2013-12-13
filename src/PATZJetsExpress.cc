@@ -124,6 +124,9 @@
 #include "EGamma/EGammaAnalysisTools/src/PFIsolationEstimator.cc"
 #include "RecoEgamma/EgammaElectronAlgos/interface/ElectronHcalHelper.h"
 
+// Energy Regression
+#include "HiggsAnalysis/GBRLikelihoodEGTools/interface/EGEnergyCorrectorSemiParm.h"
+
 //Marco Isolation
 //#include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
 #include "PFIsolation/SCFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
@@ -215,6 +218,8 @@ class PATZJetsExpress : public edm::EDAnalyzer {
         float hadronicOverEm;
 	// --- for electrons r9, for muons chi2/ndof for global track
 	float r9_or_chi2ndof;
+	float RegressionCorr;
+	float RegressionCorrErr;
         
 	// --- Trigger Matching
 	int TriMatchF1Path, TriMatchF2Path, TriMatchF3muPath, TriMatchF3elePath, TriMatchF4Path, TriMatchF5Path,TriMatchF6Path;
@@ -427,6 +432,8 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float> *lepPFIsoUnc_,*lepPFIsoDBCor_,*lepPFIsoRhoCor_,*lepMatchedDRGEN_;
       // ---- number of leptons -----------------------------------------
       int nLeptons_,nLeptonsGEN_;
+      // ---- energy regression
+      EGEnergyCorrectorSemiParm corSemiParm;
       // ---- photon variables
       int nPhotons_;
       vector<float>* photonPt_;
@@ -434,6 +441,8 @@ class PATZJetsExpress : public edm::EDAnalyzer {
       vector<float>* photonEta_;
       vector<float>* photonPhi_;
       vector<int>* photonBit_;
+      vector<float>* photonRegressionCorr_;
+      vector<float>* photonRegressionCorrErr_;
       vector<float>* photonPassConversionVeto_;
       vector<float>* photonPfIsoChargedHad_;
       vector<float>* photonPfIsoNeutralHad_;
@@ -929,6 +938,13 @@ void PATZJetsExpress::beginJob()
 	processedDataTree_->Branch("mcWeight",&mcWeight_,"mcWeight/F");
 	processedDataTree_->Branch("puTrueINT",&puTrueINT_,"puTrueINT/I");
   // ---- set the jec uncertainty flag ----------------------------------
+  // ---- init regression
+   //in principle on can use also edm::filesInPath
+   string energyRegFilename="regweights_v5_forest_ph.root";
+   char* descr = getenv("CMSSW_BASE");
+   char filename[1023];
+   sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
+   corSemiParm.Initialize(filename,5); // v5 of regression = 2012 - v8 = 2011
   //mIsJECuncSet = false; 
 }
 // ---- method called everytime there is a new run ----------------------
@@ -1038,6 +1054,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
     // ---- PU ----------------------------------------------------------
     if(!mOnlyMC){
       Handle<vector<PileupSummaryInfo> > pileupInfo;
+
       iEvent.getByLabel("addPileupInfo", pileupInfo);
       vector<PileupSummaryInfo>::const_iterator PUI;
       puOOT_ = 0;
@@ -2006,7 +2023,19 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       passPhotCaloId = true;
       }
       }
-      
+	// --- regression
+
+	      double ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval;
+      		ecor=-999;
+      		sigeovere=-999;
+      		sigma=-999;
+		Handle<double> hRhoRegr;
+  		iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
+		int phoIndex= it-photons_->begin();
+		const Photon& photon=(*photons_)[phoIndex];
+    		corSemiParm.CorrectedEnergyWithErrorV5(photon, *(vertices_.product()), *hRhoRegr, lazyTools, iSetup, ecor, sigma, alpha1, n1, alpha2, n2, pdfval); 
+	// --- END REGRESSION
+
       //---- photons Trigger Matching -----------------------
 	  pat::Photon PAT_photon;
     Handle<View<pat::Photon> > PATphotons_;
@@ -2060,6 +2089,8 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 // 	  gamma.iso   = isTriggerISO;    // this bool 0/1
 // 	  gamma.isoPF = 0; 
 	  gamma.bit   = photonBit;
+	  gamma.RegressionCorr=ecor;
+	  gamma.RegressionCorrErr=sigeovere;
 	  // chiara
 	  gamma.parameters.resize(PARTICLE::nPhotonParameters);
 	  gamma.parameters[PARTICLE::passconv]  = photonPassConv;    
@@ -2256,17 +2287,17 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       bool id = (npr>1 && phf<0.99 && nhf<0.99 && ((fabs(i_jet->eta())<=2.4 && nhf<0.9 && phf<0.9 && elf<0.99 && chf>0 && chm>0) || fabs(i_jet->eta())>2.4));
       float rms=TMath::Sqrt( TMath::Power(i_jet->userFloat("axis1"),2) + TMath::Power(i_jet->userFloat("axis2"),2) );
     // ----------- PU ID ------------------- 
-    	//Handle<ValueMap<float> > puJetIdMva;
-	//iEvent.getByLabel("fullDiscriminant",puJetIdMva);
+    	Handle<ValueMap<float> > puJetIdMva;
+	iEvent.getByLabel("fullDiscriminant",puJetIdMva);
 
-	//Handle<ValueMap<int> > puJetIdFlagMva;
-	//iEvent.getByLabel("fullId",puJetIdFlagMva);
+	Handle<ValueMap<int> > puJetIdFlagMva;
+	iEvent.getByLabel("fullId",puJetIdFlagMva);
 	
-    	//Handle<ValueMap<float> > puJetId;
-	//iEvent.getByLabel("cutbasedDiscriminant",puJetId);
+    	Handle<ValueMap<float> > puJetId;
+	iEvent.getByLabel("cutbasedDiscriminant",puJetId);
 
-	//Handle<ValueMap<int> > puJetIdFlag;
-	//iEvent.getByLabel("cutbasedId",puJetIdFlag);
+	Handle<ValueMap<int> > puJetIdFlag;
+	iEvent.getByLabel("cutbasedId",puJetIdFlag);
 
 	int puidflags=0;
 	int puidflagsmva=0;
@@ -2274,18 +2305,20 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	
 	float puidmva=-1;
 	float puid=-1;
-	//float puidmva=(*puJetIdMva)[jets->refAt(index)];
-	//idflag = (*puJetIdFlagMva)[jets->refAt(index)]; // flag are already something like binery selection . It is rewritten because they can change interface
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflagsmva|=1;}
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflagsmva|=2;}
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflagsmva|=4;}
+
+	puidmva=(*puJetIdMva)[jets->refAt(index)];
+	idflag = (*puJetIdFlagMva)[jets->refAt(index)]; // flag are already something like binery selection . It is rewritten because they can change interface
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflagsmva|=1;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflagsmva|=2;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflagsmva|=4;}
 
 
-	//float puid=(*puJetId)[jets->refAt(index)];
-	//idflag = (*puJetIdFlag)[jets->refAt(index)];
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflags|=1;}
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflags|=2;}
-	//if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflags|=4;}
+	puid=(*puJetId)[jets->refAt(index)];
+	idflag = (*puJetIdFlag)[jets->refAt(index)];
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose ) ){puidflags|=1;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium) ){puidflags|=2;}
+	if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight ) ){puidflags|=4;}
+      //---- End PU ID
 
       if (!id) jetIsIDed = false;
 
@@ -2526,6 +2559,8 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 	// myTree_->Branch("jetPhotonDPhi"    ,"vector<float>"        ,&jetPhotonDPhi_);  // chiara: questi erano gia' vector... 
         photonE_   -> push_back(myPhotons[gg].p4.Energy());
         photonPt_  -> push_back(myPhotons[gg].p4.Pt());
+        photonRegressionCorr_  -> push_back(myPhotons[gg].RegressionCorr);
+        photonRegressionCorrErr_  -> push_back(myPhotons[gg].RegressionCorrErr);
         photonEta_ -> push_back(myPhotons[gg].p4.Eta());
         photonPhi_ -> push_back(myPhotons[gg].p4.Phi());
 	photonPassConversionVeto_ -> push_back(myPhotons[gg].parameters[PARTICLE::passconv]);   
@@ -2935,6 +2970,8 @@ void PATZJetsExpress::buildTree()
   photonE_= new std::vector<float>();
   photonEta_= new std::vector<float>();
   photonPhi_= new std::vector<float>();
+  photonRegressionCorr_= new std::vector<float>();
+  photonRegressionCorrErr_= new std::vector<float>();
   photonBit_= new std::vector<int>();
   photonPassConversionVeto_= new std::vector<float>();
   photonPfIsoChargedHad_= new std::vector<float>();
@@ -3014,6 +3051,8 @@ void PATZJetsExpress::buildTree()
   myTree_->Branch("photonE"          ,"vector<float>"     ,&photonE_);
   myTree_->Branch("photonEta"        ,"vector<float>"     ,&photonEta_);
   myTree_->Branch("photonPhi"        ,"vector<float>"     ,&photonPhi_);
+  myTree_->Branch("photonRegressionCorr"         ,"vector<float>"     ,&photonRegressionCorr_);
+  myTree_->Branch("photonRegressionCorrErr"         ,"vector<float>"     ,&photonRegressionCorrErr_);
   if(!mReducedPh){
     myTree_->Branch("photonPassConversionVeto","vector<float>"   ,&photonPassConversionVeto_);
     myTree_->Branch("photonPfIsoChargedHad"   ,"vector<float>"   ,&photonPfIsoChargedHad_);  // chiara: li lasciamo? 
@@ -3239,6 +3278,8 @@ void PATZJetsExpress::clearTree()
   photonPt_          ->clear();
   photonEta_         ->clear();
   photonPhi_         ->clear();
+  photonRegressionCorr_          ->clear();
+  photonRegressionCorrErr_          ->clear();
   photonBit_         ->clear();
   photonPassConversionVeto_ ->clear();
   photonPfIsoChargedHad_   ->clear();

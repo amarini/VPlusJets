@@ -65,7 +65,7 @@ if options.merge:
 		
 		n=450
 		for i in xrange(0, len(ListToMerge), n):
-        		PartialList=l[i:i+n]	
+        		PartialList=ListToMerge[i:i+n]	
 			if i==0: 
 				cmd = ["mkdir",options.dir+"/merge_tmp/"]
 				call(cmd)

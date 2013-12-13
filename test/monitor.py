@@ -109,7 +109,7 @@ def ForceResubmit(jobList,dirName):
 	for i in range(0,len(jobList),450):
 		CallForceResubmit(jobList[i:i+450],dirName);
 
-def SubmitAll(Result,dirName,Resubmit=True):
+def SubmitAll(Result,dirName,Resubmit=False):
 	jobList=[]
 	for key in Result:
 		jobList.append(key)
@@ -117,9 +117,28 @@ def SubmitAll(Result,dirName,Resubmit=True):
 
 def ReSubmitES(exitN,Result,dirName):
 	jobList=[]
+	sites={}
 	for key in Result:
 		if Result[key]['exeExit']==exitN or Result[key]['jobExit']==exitN:
 			jobList.append(key)
+			if exitN == 8020: ## site error: ban T2
+				SE=subprocess.check_output("cat "+dirName+"/res/CMSSW_"+str(key)+".stdout | grep '^SyncSite='  | tail -n 1 | cut -d '=' -f2", shell=True)	
+				try:
+					sites[ SE ] += 1
+				except KeyError:
+					try: sites[ SE ] = 1
+					except KeyError: pass
+	for se in sites:
+		if sites[ se ] > 10 and len(se) >4 : #avoid malformed strings
+			print " BANNING SE " + se
+			found=False
+			for i in range(0,len(submitOptions)):
+				if "se_black_list" in submitOptions[i]:
+					if not se in submitOptions[i]:submitOptions[i]+=","+se
+					found=True
+			if not Found:
+				submitOptions.append("-GRID.se_black_list="+se)
+			
 	Submit(jobList,dirName,True)
 
 def ReSubmitCA(Result,dirName):
@@ -231,16 +250,18 @@ if __name__ == "__main__":
 	#main loop
 	if options.loop:
 		signal.signal(signal.SIGINT, signal_handler)
+		
+	if options.loop and options.submit:
+		print "-- cannot be loop & submit --"
+		sys.exit(0)
 
 	while True:		
 		for dir in arg:
-			#CrabStatus(dir)
-			#Results=ReadStatus("/tmp/amarini/status")
-			Results=FullStatus(dir)
-			#PrintDatabase(Results)
-			PrintStatus(Results,dir)
 			if options.submit:
-				SubmitAll(dir)
+				Results=Status(dir)
+				SubmitAll(Results,dir)
+			Results=FullStatus(dir)
+			PrintStatus(Results,dir)
 			print "-- Resubmit Cancelled & Aborted --"		
 			ReSubmitCA(Results,dir)
 			for exitStatus in numList:

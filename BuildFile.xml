@@ -14,4 +14,7 @@
 <use name="PFIsolation/SCFootprintRemoval"/>
 <use name="CMGTools/External"/>
 <use name="clhep"/>
+<use name="RooFit"/>
+<use name="HiggsAnalysis/GBRLikelihood"/>
+<use name="HiggsAnalysis/GBRLikelihoodEGTools"/>
 <flags   EDM_PLUGIN="1"/>
