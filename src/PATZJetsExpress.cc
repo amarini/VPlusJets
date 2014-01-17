@@ -126,6 +126,7 @@
 
 // Energy Regression
 #include "HiggsAnalysis/GBRLikelihoodEGTools/interface/EGEnergyCorrectorSemiParm.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/HybridGBRForest.h"
 
 //Marco Isolation
 //#include "PFIsolation/SuperClusterFootprintRemoval/interface/SuperClusterFootprintRemoval.h"
@@ -938,13 +939,6 @@ void PATZJetsExpress::beginJob()
 	processedDataTree_->Branch("mcWeight",&mcWeight_,"mcWeight/F");
 	processedDataTree_->Branch("puTrueINT",&puTrueINT_,"puTrueINT/I");
   // ---- set the jec uncertainty flag ----------------------------------
-  // ---- init regression
-   //in principle on can use also edm::filesInPath
-   string energyRegFilename="regweights_v5_forest_ph.root";
-   char* descr = getenv("CMSSW_BASE");
-   char filename[1023];
-   sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
-   corSemiParm.Initialize(filename,5); // v5 of regression = 2012 - v8 = 2011
   //mIsJECuncSet = false; 
 }
 // ---- method called everytime there is a new run ----------------------
@@ -2023,7 +2017,26 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       passPhotCaloId = true;
       }
       }
+  // ---- init regression
+   //in principle on can use also edm::filesInPath
+         if( !corSemiParm.IsInitialized() ) {
+		   string energyRegFilename="regweights_v5_forest_ph.root";
+		   char* descr = getenv("CMSSW_BASE");
+		   char filename[1023];
+		   sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
+		   printf("Regression FileName=%s\n",filename);
+		   corSemiParm.Initialize(filename,5); // v5 of regression = 2012 - v8 = 2011
+			//DEBUG
+			TFile *f=TFile::Open(filename);
+			HybridGBRForest *F=(HybridGBRForest*)f->Get("EGRegressionForest_EB");
+			float *v=new float;v[0]=1;
+			printf("Forest\n");
+			printf("Forest test : %.2f\n",F->GetResponse(v,0));
+			delete F;
+			f->Close();
+	}
 	// --- regression
+	fprintf(stderr,"---begin Regression \t\tDEBUG\n");
 
 	      double ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval;
       		ecor=-999;
@@ -2033,7 +2046,9 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
   		iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
 		int phoIndex= it-photons_->begin();
 		const Photon& photon=(*photons_)[phoIndex];
+	fprintf(stderr,"---     Regression Correction \t\tDEBUG\n");
     		corSemiParm.CorrectedEnergyWithErrorV5(photon, *(vertices_.product()), *hRhoRegr, lazyTools, iSetup, ecor, sigma, alpha1, n1, alpha2, n2, pdfval); 
+	fprintf(stderr,"---end Regression \t\tDEBUG\n");
 	// --- END REGRESSION
 
       //---- photons Trigger Matching -----------------------
@@ -2287,17 +2302,20 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       bool id = (npr>1 && phf<0.99 && nhf<0.99 && ((fabs(i_jet->eta())<=2.4 && nhf<0.9 && phf<0.9 && elf<0.99 && chf>0 && chm>0) || fabs(i_jet->eta())>2.4));
       float rms=TMath::Sqrt( TMath::Power(i_jet->userFloat("axis1"),2) + TMath::Power(i_jet->userFloat("axis2"),2) );
     // ----------- PU ID ------------------- 
+	//puJetIdselectedPatJets+puJetMvaselectedPatJets cms.InputTag("puJetIdselectedPatJets") {'cutbased': cms.InputTag("puJetMvaselectedPatJets","cutbasedDiscriminant"), 'full53x': cms.InputTag("puJetMvaselectedPatJets","full53xDiscriminant")} {'cutbased': cms.InputTag("puJetMvaselectedPatJets","cutbasedId"), 'full53x': cms.InputTag("puJetMvaselectedPatJets","full53xId")} ['keep *_puJetIdselectedPatJets_*_*', 'keep *_puJetMvaselectedPatJets_*_*']
+
     	Handle<ValueMap<float> > puJetIdMva;
-	iEvent.getByLabel("fullDiscriminant",puJetIdMva);
+	//iEvent.getByLabel("fullDiscriminant",puJetIdMva);
+	iEvent.getByLabel(edm::InputTag("puJetMva","full53xDiscriminant") ,puJetIdMva);
 
 	Handle<ValueMap<int> > puJetIdFlagMva;
-	iEvent.getByLabel("fullId",puJetIdFlagMva);
+	iEvent.getByLabel(edm::InputTag("puJetMva","full53xId"),puJetIdFlagMva);
 	
     	Handle<ValueMap<float> > puJetId;
-	iEvent.getByLabel("cutbasedDiscriminant",puJetId);
+	iEvent.getByLabel(edm::InputTag("puJetMva","cutbasedDiscriminant"),puJetId);
 
 	Handle<ValueMap<int> > puJetIdFlag;
-	iEvent.getByLabel("cutbasedId",puJetIdFlag);
+	iEvent.getByLabel(edm::InputTag("puJetMva","cutbasedId"),puJetIdFlag);
 
 	int puidflags=0;
 	int puidflagsmva=0;

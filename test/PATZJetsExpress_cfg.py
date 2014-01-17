@@ -65,7 +65,8 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 # ---- define the source ------------------------------------------------
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-'file:/data/sandro/Analisi/GammaJets/CMSSW_5_3_6xxx2013_06_03_TriMatch/CMSSW_5_3_6/src/amarini/VPlusJets/test/input_DYJetsToLL_M-50_Summer12.root'
+'/store/mc/Summer12_DR53X/WJetsToLNu_PtW-100_TuneZ2star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0001/0025C7D0-10E5-E111-B0E8-00259074AE3E.root',
+'/store/mc/Summer12_DR53X/WJetsToLNu_PtW-100_TuneZ2star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0001/389F6482-DDE4-E111-820A-00259074AE94.root'
     )
 )
 
@@ -74,6 +75,15 @@ process.load("CMGTools.External.pujetidsequence_cff")
 #change jet type to our
 process.puJetId.jets = cms.InputTag("jetExtender",'extendedPatJets')
 process.puJetMva.jets = cms.InputTag("jetExtender",'extendedPatJets')
+###
+#### keep the PU JetID products
+###process.out.extend(["keep *_puJetId_*_*", # input variables
+###		    "keep *_puJetMva_*_*" # final MVAs and working point flags
+###		])
+
+from CMGTools.External.pujetidsequence_cff import loadPujetId
+#(PUIdSequence,inputsTag,mvaTags,idTags,outputCommands)=loadPujetId(process, 'selectedPatJets',mvaOnly=False,isChs=False,release="53X")
+#print PUIdSequence,inputsTag,mvaTags,idTags,outputCommands
 
 # load QGL Tagger
 process.load('QuarkGluonTagger.EightTeV.QGTagger_RecoJets_cff') 
@@ -499,8 +509,10 @@ process.p = cms.Path(process.pfParticleSelectionSequence
 if(isMC):
 	process.p += process.genParticlesForJets
 process.tail = cms.Sequence(process.patDefaultSequence + process.jetExtender + 
-		#process.puJetIdSqeuence + 
-		process.QuarkGluonTagger + process.accepted)
+		process.puJetIdSqeuence + 
+		#PUIdSequence + 
+		process.QuarkGluonTagger + 
+		process.accepted)
 
 process.p += process.tail
 
