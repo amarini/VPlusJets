@@ -1,11 +1,9 @@
-
+#!/bin/bash
 #export "SCRAM_ARCH=slc5_amd64_gcc462"
 #cmsrel CMSSW_5_3_9
 #cd CMSSW_5_3_9/src
 #cmsenv
 
-#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
-#Random cone
 
 get_git() ## usage get_git tag src dest
 {
@@ -33,10 +31,13 @@ get_git() ## usage get_git tag src dest
 }
 
 
-
-# V01-05 bug fix for RC
 cd $CMSSW_BASE/src
-mkdir PFIsolation; cd PFIsolation; git clone https://github.com/peruzzim/SCFootprintRemoval.git ; cd SCFootprintRemoval ; git checkout V01-05 ;
+
+#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
+#Random cone
+# V01-05 bug fix for RC
+#mkdir PFIsolation; cd PFIsolation; git clone https://github.com/peruzzim/SCFootprintRemoval.git ; cd SCFootprintRemoval ; git checkout V01-05 ;
+get_git V01-05 https://github.com/peruzzim/SCFootprintRemoval.git PFIsolation/SCFootprintRemoval
 #------------------PATCH TO HAVE 20 - 30 in RC isolation-----------------------------------------------#
 cd $CMSSW_BASE/src/PFIsolation/SCFootprintRemoval/src
 patch SuperClusterFootprintRemoval.cc <<EOF
@@ -61,6 +62,10 @@ patch SuperClusterFootprintRemoval.cc <<EOF
 EOF
 ##################
 
+cd $CMSSW_BASE/src
+echo "Going into $CMSSW_BASE"
+git init .
+git fetch cmssw-main
 ## PU Jet ID
 #cd $CMSSW_BASE/src
 #mkdir CMGTools ;cd CMGTools ;git clone -b V00-03-04  git@github.com:h2gglobe/External  
@@ -74,20 +79,19 @@ get_git hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools HiggsAnalysis/GB
 #cd $CMSSW_BASE/src ;mkdir -p HiggsAnalysis ; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihood 
 #cd $CMSSW_BASE/src ; mkdir -p HiggsAnalysis; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools
 ########################### TO BE MOVED TO GIT ########################
-cd $CMSSW_BASE/src
 # are these related to H->gg variables?
-cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
-cd $CMSSW_BASE/src; 
+#cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+get_git master https://github.com/h2gglobe/EGammaAnalysisTools EGamma/EGammaAnalysisTools
 
-
-
-# 
-addpkg  CommonTools/ParticleFlow V00-03-13  
-addpkg  RecoParticleFlow/PFProducer V15-01-11
+git cms-cvs-history import V00-03-13 CommonTools/ParticleFlow
+git cms-cvs-history import V15-01-11 RecoParticleFlow/PFProducer
 
 ############################ GIT #######################
-mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-12 ; cd ../..
-git clone git@github.com:amarini/QuarkGluonTagger.git ; cd QuarkGluonTagger ; git checkout v1-2-5 ; cd ..
+#mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-12 ; cd ../..
+#git clone git@github.com:amarini/QuarkGluonTagger.git ; cd QuarkGluonTagger ; git checkout v1-2-5 ; cd ..
+get_git v1-2-5 git@github.com:amarini/QuarkGluonTagger.git amarini/QuarkGluonTagger
 
 scram b -j 4
+
+cd amarini/VPlusJets
 
