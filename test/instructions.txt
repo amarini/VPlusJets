@@ -89,7 +89,7 @@ git cms-cvs-history import V15-01-11 RecoParticleFlow/PFProducer
 ############################ GIT #######################
 #mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-12 ; cd ../..
 #git clone git@github.com:amarini/QuarkGluonTagger.git ; cd QuarkGluonTagger ; git checkout v1-2-5 ; cd ..
-get_git v1-2-5 git@github.com:amarini/QuarkGluonTagger.git amarini/QuarkGluonTagger
+get_git v1-2-5 git@github.com:amarini/QuarkGluonTagger.git QuarkGluonTagger
 
 scram b -j 4
 
