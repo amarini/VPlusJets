@@ -2028,10 +2028,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       passPhotCaloId = true;
       }
       }
-  // ---- init regression
-   //in principle on can use also edm::filesInPath
 	// --- regression
-	fprintf(stderr,"---begin Regression \t\tDEBUG\n");
 
 	      double ecor, sigeovere,/* mean,*/ sigma, alpha1, n1, alpha2, n2, pdfval;
       		ecor=-999;
@@ -2041,9 +2038,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
   		iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"), hRhoRegr); 
 		int phoIndex= it-photons_->begin();
 		const Photon& photon=(*photons_)[phoIndex];
-	fprintf(stderr,"---     Regression Correction \t\tDEBUG\n");
     		corSemiParm.CorrectedEnergyWithErrorV5(photon, *(vertices_.product()), *hRhoRegr, lazyTools, iSetup, ecor, sigma, alpha1, n1, alpha2, n2, pdfval); 
-	fprintf(stderr,"---end Regression \t\tDEBUG\n");
 	// --- END REGRESSION
 
       //---- photons Trigger Matching -----------------------
