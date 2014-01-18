@@ -31,6 +31,8 @@
 #include "TLorentzVector.h"
 #include "TH1I.h"
 #include "TH1F.h"
+#include "TROOT.h"
+#include "TSystem.h"
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -940,6 +942,15 @@ void PATZJetsExpress::beginJob()
 	processedDataTree_->Branch("puTrueINT",&puTrueINT_,"puTrueINT/I");
   // ---- set the jec uncertainty flag ----------------------------------
   //mIsJECuncSet = false; 
+	//regression -- init 
+         if( !corSemiParm.IsInitialized() ) {
+		   string energyRegFilename="regweights_v5_forest_ph.root";
+		   char* descr = getenv("CMSSW_BASE");
+		   char filename[1023];
+		   sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
+		   printf("Regression FileName=%s\n",filename);
+		   corSemiParm.Initialize(filename,5); // v5 of regression = 2012 - v8 = 2011
+	}
 }
 // ---- method called everytime there is a new run ----------------------
 void PATZJetsExpress::beginRun(edm::Run const & iRun, edm::EventSetup const& iSetup)
@@ -2019,26 +2030,10 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
       }
   // ---- init regression
    //in principle on can use also edm::filesInPath
-         if( !corSemiParm.IsInitialized() ) {
-		   string energyRegFilename="regweights_v5_forest_ph.root";
-		   char* descr = getenv("CMSSW_BASE");
-		   char filename[1023];
-		   sprintf(filename, "%s/src/HiggsAnalysis/GBRLikelihoodEGTools/data/%s", descr, energyRegFilename.c_str());
-		   printf("Regression FileName=%s\n",filename);
-		   corSemiParm.Initialize(filename,5); // v5 of regression = 2012 - v8 = 2011
-			//DEBUG
-			TFile *f=TFile::Open(filename);
-			HybridGBRForest *F=(HybridGBRForest*)f->Get("EGRegressionForest_EB");
-			float *v=new float;v[0]=1;
-			printf("Forest\n");
-			printf("Forest test : %.2f\n",F->GetResponse(v,0));
-			delete F;
-			f->Close();
-	}
 	// --- regression
 	fprintf(stderr,"---begin Regression \t\tDEBUG\n");
 
-	      double ecor, sigeovere, mean, sigma, alpha1, n1, alpha2, n2, pdfval;
+	      double ecor, sigeovere,/* mean,*/ sigma, alpha1, n1, alpha2, n2, pdfval;
       		ecor=-999;
       		sigeovere=-999;
       		sigma=-999;
