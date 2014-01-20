@@ -2095,7 +2095,7 @@ void PATZJetsExpress::analyze(const Event& iEvent, const EventSetup& iSetup)
 // 	  gamma.isoPF = 0; 
 	  gamma.bit   = photonBit;
 	  gamma.RegressionCorr=ecor;
-	  gamma.RegressionCorrErr=sigeovere;
+	  gamma.RegressionCorrErr=sigma;
 	  // chiara
 	  gamma.parameters.resize(PARTICLE::nPhotonParameters);
 	  gamma.parameters[PARTICLE::passconv]  = photonPassConv;    
