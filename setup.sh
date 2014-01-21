@@ -1,8 +1,14 @@
 #!/bin/bash
+
+
+#### Commands to be issued before checking out the code
+
 #export "SCRAM_ARCH=slc5_amd64_gcc462"
-#cmsrel CMSSW_5_3_9
-#cd CMSSW_5_3_9/src
+#cmsrel CMSSW_5_3_10_patch2
+#cd CMSSW_5_3_10_patch2/src
 #cmsenv
+
+#mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets -b V00-14;
 
 
 get_git() ## usage get_git tag src dest
@@ -84,7 +90,7 @@ get_git V00-03-04 https://github.com/h2gglobe/External.git CMGTools/External
 get_git 20836b5 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
 get_git hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools HiggsAnalysis/GBRLikelihoodEGTools
 
-########################### TO BE MOVED TO GIT ########################
+########################### EG TOOLS  ########################
 # are these related to H->gg variables? Globe is using head.
 #cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 get_git master https://github.com/h2gglobe/EGammaAnalysisTools EGamma/EGammaAnalysisTools
@@ -92,10 +98,9 @@ get_git master https://github.com/h2gglobe/EGammaAnalysisTools EGamma/EGammaAnal
 git cms-cvs-history import V00-03-13 CommonTools/ParticleFlow
 git cms-cvs-history import V15-01-11 RecoParticleFlow/PFProducer
 
-############################ GIT #######################
+############################ QG Tagger #######################
 get_git v1-2-6 git@github.com:amarini/QuarkGluonTagger.git QuarkGluonTagger
 
-#mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-12 ; cd ../..
 scram b -j 4
 
 cd amarini/VPlusJets
