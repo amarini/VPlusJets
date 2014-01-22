@@ -90,6 +90,14 @@ get_git V00-03-04 https://github.com/h2gglobe/External.git CMGTools/External
 get_git 20836b5 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
 get_git hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools HiggsAnalysis/GBRLikelihoodEGTools
 
+############### Keep tarball size limited ####################
+# we need just regression on photons. v5
+mv HiggsAnalysis/GBRLikelihoodEGTools/data/regweights_v5_forest_ph.root ./
+#rm HiggsAnalysis/GBRLikelihoodEGTools/data/*{v4,v6,v7,v8}*
+rm HiggsAnalysis/GBRLikelihoodEGTools/data/*.root
+mv regweights_v5_forest_ph.root HiggsAnalysis/GBRLikelihoodEGTools/data/
+
+
 ########################### EG TOOLS  ########################
 # are these related to H->gg variables? Globe is using head.
 #cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
