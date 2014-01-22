@@ -1,11 +1,15 @@
+#!/bin/bash
+
+
+#### Commands to be issued before checking out the code
 
 #export "SCRAM_ARCH=slc5_amd64_gcc462"
-#cmsrel CMSSW_5_3_9
-#cd CMSSW_5_3_9/src
+#cmsrel CMSSW_5_3_10_patch2
+#cd CMSSW_5_3_10_patch2/src
 #cmsenv
 
-#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
-#Random cone
+#mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets -b V00-14;
+
 
 get_git() ## usage get_git tag src dest
 {
@@ -33,10 +37,15 @@ get_git() ## usage get_git tag src dest
 }
 
 
-
-# V01-05 bug fix for RC
+echo "Going into $CMSSW_BASE"
 cd $CMSSW_BASE/src
-mkdir PFIsolation; cd PFIsolation; git clone https://github.com/peruzzim/SCFootprintRemoval.git ; cd SCFootprintRemoval ; git checkout V01-05 ;
+
+#https://twiki.cern.ch/twiki/bin/viewauth/CMS/SuperClusterFootprintRemoval --
+#Random cone
+# V01-05 bug fix for RC
+
+get_git V01-05 https://github.com/peruzzim/SCFootprintRemoval.git PFIsolation/SCFootprintRemoval
+
 #------------------PATCH TO HAVE 20 - 30 in RC isolation-----------------------------------------------#
 cd $CMSSW_BASE/src/PFIsolation/SCFootprintRemoval/src
 patch SuperClusterFootprintRemoval.cc <<EOF
@@ -60,34 +69,47 @@ patch SuperClusterFootprintRemoval.cc <<EOF
    }
 EOF
 ##################
+cd $CMSSW_BASE/src
+
+#these commands are needed by cms-cvs-history 
+git init .
+git fetch cmssw-main
 
 ## PU Jet ID
-#cd $CMSSW_BASE/src
-#mkdir CMGTools ;cd CMGTools ;git clone -b V00-03-04  git@github.com:h2gglobe/External  
+# taken from h2gglobe. Used by PU-ID
+
 get_git V00-03-04 https://github.com/h2gglobe/External.git CMGTools/External 
 
 ##################
 
 ## Energy Regression by Josh
-get_git hggpaperV6 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
+#get_git hggpaperV6 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
+# after speaking with Josh he suggested the master. I put the sha1 of the
+# current head. For EGTools, current head is still the tag.
+
+get_git 20836b5 git@github.com:bendavid/GBRLikelihood HiggsAnalysis/GBRLikelihood
 get_git hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools HiggsAnalysis/GBRLikelihoodEGTools
-#cd $CMSSW_BASE/src ;mkdir -p HiggsAnalysis ; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihood 
-#cd $CMSSW_BASE/src ; mkdir -p HiggsAnalysis; cd HiggsAnalysis ; git clone -b hggpaperV6 git@github.com:bendavid/GBRLikelihoodEGTools
-########################### TO BE MOVED TO GIT ########################
-cd $CMSSW_BASE/src
-# are these related to H->gg variables?
-cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
-cd $CMSSW_BASE/src; 
+
+############### Keep tarball size limited ####################
+# we need just regression on photons. v5
+mv HiggsAnalysis/GBRLikelihoodEGTools/data/regweights_v5_forest_ph.root ./
+#rm HiggsAnalysis/GBRLikelihoodEGTools/data/*{v4,v6,v7,v8}*
+rm HiggsAnalysis/GBRLikelihoodEGTools/data/*.root
+mv regweights_v5_forest_ph.root HiggsAnalysis/GBRLikelihoodEGTools/data/
 
 
+########################### EG TOOLS  ########################
+# are these related to H->gg variables? Globe is using head.
+#cvs co -r V00-00-21 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+get_git master https://github.com/h2gglobe/EGammaAnalysisTools EGamma/EGammaAnalysisTools
 
-# 
-addpkg  CommonTools/ParticleFlow V00-03-13  
-addpkg  RecoParticleFlow/PFProducer V15-01-11
+git cms-cvs-history import V00-03-13 CommonTools/ParticleFlow
+git cms-cvs-history import V15-01-11 RecoParticleFlow/PFProducer
 
-############################ GIT #######################
-mkdir amarini; cd amarini; git clone git@github.com:amarini/VPlusJets.git ; cd VPlusJets ; git checkout V00-12 ; cd ../..
-git clone git@github.com:amarini/QuarkGluonTagger.git ; cd QuarkGluonTagger ; git checkout v1-2-5 ; cd ..
+############################ QG Tagger #######################
+get_git v1-2-6 git@github.com:amarini/QuarkGluonTagger.git QuarkGluonTagger
 
 scram b -j 4
+
+cd amarini/VPlusJets
 
