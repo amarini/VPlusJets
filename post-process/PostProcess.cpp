@@ -100,9 +100,9 @@ int main(int argc, char**argv){
 		}else if(pu==10){
 			AddPUWeight(argv[1],"mcTruePU");
 		}else if(pu ==1){
-			AddPUWeight(argv[1],"mcTruePU","accepted","events",1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1,1,"pileup/all.json.pileup_UP.root");
 		}else if(pu==-1){
-			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/all.json.pileup_DN.root");
 			}
 		else if(pu==100)
 			{
@@ -121,8 +121,8 @@ int main(int argc, char**argv){
 			AddRDWeight(argv[1],"accepted","events",xSec,"processedData",string(folder + "/RunAndLumi.txt").c_str(),1.0);
 			}
 		if(pu == 5 ) {
-			AddPUWeight(argv[1],"mcTruePU","accepted","events",1);
-			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1);
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",1,1,"pileup/all.json.pileup_UP.root");
+			AddPUWeight(argv[1],"mcTruePU","accepted","events",-1,1,"pileup/all.json.pileup_DN.root");
 			}
 		if( pu==5 || pu ==6){
 			printf("Going to do HLT150\n");
