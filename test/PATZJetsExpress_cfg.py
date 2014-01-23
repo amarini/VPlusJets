@@ -184,7 +184,7 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
     minPhoPt        = cms.double(50),
     minPhoPtId      = cms.double(30),
     maxPhoEta       = cms.double(3.0),
-    minLepPt        = cms.double(20),
+    minLepPt        = cms.double(18),
     maxLepEta       = cms.double(2.4),
     maxCombRelIso03 = cms.double(0.15),
     maxCombRelIso04 = cms.double(0.12),
@@ -193,7 +193,7 @@ process.accepted = cms.EDAnalyzer('PATZJetsExpress',
     ReducedPh       = cms.bool(False), #if TRUE: reduce photon information to 4-Vector  
     dressedRadius   = cms.double(0.1),
     #GENCrossCleaning= cms.int32(1), #OBSOLETE
-    GENType         = cms.int32(0), #
+    GENType         = cms.int32(1), #
     processName     = cms.string('HLT'),
     ##SuperCluster Foot Print Removal
     tag_jets        = cms.InputTag('jetExtender','extendedPatJets'),

@@ -34,15 +34,16 @@ USER.se_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
 USER.ce_black_list = T2_US_Florida,T3_US_Colorado,T2_US_Nebraska,T2_EE
 USER.ui_working_dir = Data
 #USER.storage_element = srm-eoscms.cern.ch
-#USER.storage_path=/srm/v2/server?SFN=/eos/cms/store/user/amarini/zjets_V00-13
+#USER.storage_path=/srm/v2/server?SFN=/eos/cms/store/user/amarini/zjets_V00-14
 USER.storage_element = T2_CH_CSCS 
 
-CMSSW.lumis_per_job = 120
+CMSSW.lumis_per_job = 60
 CMSSW.total_number_of_lumis = -1
 
 EOF
 
-for i in "/DoubleMuParked/Run2012C-22Jan2013-v1/AOD" "/DoubleMu/Run2012A-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012D-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012B-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012B-22Jan2013-v1/AOD" "/DoubleElectron/Run2012B-22Jan2013-v1/AOD" "/DoubleElectron/Run2012C-22Jan2013-v1/AOD" "/DoubleElectron/Run2012D-22Jan2013-v1/AOD" "/DoubleElectron/Run2012A-22Jan2013-v1/AOD" "/MuEG/Run2012D-22Jan2013-v1/AOD" "/MuEG/Run2012A-22Jan2013-v1/AOD" "/MuEG/Run2012B-22Jan2013-v1/AOD" "/MuEG/Run2012C-22Jan2013-v1/AOD" "/Photon/Run2012A-22Jan2013-v1/AOD" "/SinglePhoton/Run2012B-22Jan2013-v1/AOD" "/SinglePhoton/Run2012C-22Jan2013-v1/AOD" "/SinglePhotonParked/Run2012D-22Jan2013-v1/AOD" ; do 
+#for i in "/DoubleMuParked/Run2012C-22Jan2013-v1/AOD" "/DoubleMu/Run2012A-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012D-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012B-22Jan2013-v1/AOD" "/DoubleMuParked/Run2012B-22Jan2013-v1/AOD" "/DoubleElectron/Run2012B-22Jan2013-v1/AOD" "/DoubleElectron/Run2012C-22Jan2013-v1/AOD" "/DoubleElectron/Run2012D-22Jan2013-v1/AOD" "/DoubleElectron/Run2012A-22Jan2013-v1/AOD" "/MuEG/Run2012D-22Jan2013-v1/AOD" "/MuEG/Run2012A-22Jan2013-v1/AOD" "/MuEG/Run2012B-22Jan2013-v1/AOD" "/MuEG/Run2012C-22Jan2013-v1/AOD" 
+for i in "/Photon/Run2012A-22Jan2013-v1/AOD" "/SinglePhoton/Run2012B-22Jan2013-v1/AOD" "/SinglePhoton/Run2012C-22Jan2013-v1/AOD" "/SinglePhotonParked/Run2012D-22Jan2013-v1/AOD" ; do 
 
 #echo $i ; 
 
@@ -51,7 +52,7 @@ echo "CMSSW.datasetpath=$i"
 echo "CMSSW.lumi_mask = /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Reprocessing/Cert_190456-208686_8TeV_22Jan2013ReReco_Collisions12_JSON.txt"
 echo "CMSSW.pset = PATZJetsExpressData_cfg.py"
 #echo "USER.user_remote_dir = $(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
-echo "USER.user_remote_dir = zjets_V00_13/$(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
+echo "USER.user_remote_dir = zjets_V00-14/$(echo $i | sed 's:/:_:g' | sed 's:_:/:' )"
 echo 
 echo
 
