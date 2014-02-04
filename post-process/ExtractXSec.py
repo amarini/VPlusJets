@@ -1,5 +1,6 @@
 import ROOT 
 import sys,os,array
+import math
 from optparse import OptionParser, make_option
 
 ROOT.gROOT.SetBatch()
@@ -14,6 +15,7 @@ for file in args:
 	print "FILE IS --- "+file+" ---"
 	f=ROOT.TFile.Open(file)
 	h=f.Get("accepted/XSec")
-	if( options.type.lower() == 'int' or options.type.lower() == 'all'): print " Int xSec   = " + str(h.GetBinContent(h.FindBin(0))/h.GetBinContent(h.FindBin(1)))
-	if( options.type.lower() == 'ext' or options.type.lower() == 'all'): print " Ext xSec   = " + str(h.GetBinContent(h.FindBin(2))/h.GetBinContent(h.FindBin(3)))
-	if( options.type.lower() == 'nlo' or options.type.lower() == 'all'): 	print " ExtNLOxSec = " + str(h.GetBinContent(h.FindBin(4))/h.GetBinContent(h.FindBin(5)))
+	if( options.type.lower() == 'int' or options.type.lower() == 'all'): 
+		print " Int xSec   = " + str(h.GetBinContent(h.FindBin(0))/h.GetBinContent(h.FindBin(1))) + " +/- " + str(math.sqrt(1./h.GetBinContent(h.FindBin(1)) ))
+	if( options.type.lower() == 'ext' or options.type.lower() == 'all'): print " Ext xSec   = " + str(h.GetBinContent(h.FindBin(2))/h.GetBinContent(h.FindBin(3)))  + " +/- " + str(math.sqrt(1./h.GetBinContent(h.FindBin(3)) ))
+	if( options.type.lower() == 'nlo' or options.type.lower() == 'all'): 	print " ExtNLOxSec = " + str(h.GetBinContent(h.FindBin(4))/h.GetBinContent(h.FindBin(5))) + " +/- " + str(math.sqrt(1./h.GetBinContent(h.FindBin(5)) ))
