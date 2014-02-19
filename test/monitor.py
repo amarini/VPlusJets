@@ -163,6 +163,7 @@ def PrintStatus(Result,dirName=""):
 	Submitted=0
 	Running=0
 	Exit={}
+	line=""
 	for key in Result:
 		try:
 			Exit[ Result[key]['jobExit'] ] += 1
@@ -183,22 +184,22 @@ def PrintStatus(Result,dirName=""):
 	
 	if DONE+NOTDONE == 0: NOTDONE=-1
 	
-	print "---------------------------"
-	print "| " +dirName + " |"
-	print "---------------------------"
-	print "\033[01;32mDONE    = %4d     (%.2f%%)"%(DONE,float(DONE)/(DONE+NOTDONE)*100)
-	print "\033[01;31mNOTDONE = %4d     (%.2f%%)"%(NOTDONE,float(NOTDONE)/(DONE+NOTDONE)*100)
-	print "\033[0m---------------------------"
-	line="\033[01;34m["
+	line+= "---------------------------\n"
+	line+= "| " +dirName + " |\n"
+	line+= "---------------------------\n"
+	line+= "\033[01;33mDONE    = %4d     (%.2f%%)\n"%(DONE,float(DONE)/(DONE+NOTDONE)*100)
+	if NOTDONE != 0 :line+= "\033[01;31mNOTDONE = %4d     (%.2f%%)\n"%(NOTDONE,float(NOTDONE)/(DONE+NOTDONE)*100)
+	line+= "\033[0m---------------------------\n"
+	line+="\033[01;34m["
 	tot=25
 	dash=int(tot*float(DONE)/(DONE+NOTDONE) )
 	space=tot-dash-1
 	for i in range(0,dash):line += '='
 	if dash<tot: line+='>'
 	for i in range(0,space):line+= ' '
-	line +=']\033[0m'
+	line +=']\033[0m\n'
+	line += "---------------------------\n"
 	print line
-	print "---------------------------"
 	print "Cancelled: %d"%(Cancelled)
 	print "Aborted: %d"%(Aborted)
 	print "Submitted: %d"%(Submitted)
@@ -206,6 +207,7 @@ def PrintStatus(Result,dirName=""):
 	for key in Exit:
 		print "ExitStatus %d: %d"%(key,Exit[key])
 	print "---------------------------"
+	return line
 
 def PrintDatabase(Results):
 	for key in Results:
@@ -219,7 +221,7 @@ if __name__ == "__main__":
 	parser.add_option("-n","--dryrun",help="Dry Run: Print command instead of re/submit",dest="dryrun",default=False,action='store_true')
 	parser.add_option("-s","--submit",help="Submit jobs",dest='submit',default=False,action='store_true')
 	parser.add_option("-x","--extra",help="Extra Options for submit. E.g. '-GRID.se_black_list=T2;-GRID.ce_black..'",dest='extra',default='',type='string')
-	parser.add_option("-e","--exitNumber",help="Resubmit Exit 1,2,3 ...\nDefault=8020,8021,60317,60307,50664,50115,10034,8001,8022",dest='exit',default='8020,8021,60317,60307,50664,50115,10034,8001,8022,8028',type='string') 
+	parser.add_option("-e","--exitNumber",help="Resubmit Exit 1,2,3 ...\nDefault=%default",dest='exit',default='127,8020,8021,60317,60318,60307,50664,50115,10034,8001,8022,8028,50800',type='string') 
 	parser.add_option("","--forceResubmitSubmittedJobs",help="Force Resubmition of jobs in status submitted",dest="forceResubmit",default=False,action='store_true')
 	(options,arg) = parser.parse_args()
 
@@ -255,13 +257,14 @@ if __name__ == "__main__":
 		print "-- cannot be loop & submit --"
 		sys.exit(0)
 
-	while True:		
+	while True:
+		Summary=""
 		for dir in arg:
 			if options.submit:
 				Results=Status(dir)
 				SubmitAll(Results,dir)
 			Results=FullStatus(dir)
-			PrintStatus(Results,dir)
+			Summary+=PrintStatus(Results,dir) 
 			print "-- Resubmit Cancelled & Aborted --"		
 			ReSubmitCA(Results,dir)
 			for exitStatus in numList:
@@ -271,7 +274,7 @@ if __name__ == "__main__":
 			if options.forceResubmit:
 				ForceReSubmitSubmitted(Results,dir)
 				sys.exit(0)
-
+		print "\n\n" + Summary + "\n\n"
 		if options.loop : 
 			print "--- GOING TO SLEEP ----"
 			time.sleep(15*60)
