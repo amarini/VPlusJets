@@ -23,6 +23,96 @@ def signal_handler(signal, frame):
         print 'You pressed Ctrl+C!'
         sys.exit(0)
 
+def getTerminalSize():
+    import os
+    env = os.environ
+    def ioctl_GWINSZ(fd):
+        try:
+            import fcntl, termios, struct, os
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
+        '1234'))
+        except:
+            return
+        return cr
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        cr = (env.get('LINES', 25), env.get('COLUMNS', 80))
+
+        ### Use get(key[, default]) instead of a try/catch
+        #try:
+        #    cr = (env['LINES'], env['COLUMNS'])
+        #except:
+        #    cr = (25, 80)
+    return int(cr[1]), int(cr[0])
+
+
+#---------------------------  (1)
+#| crab_fqq0.50_x1 |
+#---------------------------  (2)
+#DONE    = 1000     (100.00%)
+#---------------------------  (3)
+#[=========================]
+#---------------------------  (4)
+
+def FixedSize(line,size):
+	n=len(line);
+	if '\033' in line: n-=12
+	for i in range(n,size):
+		line+=' '
+	return line
+
+def PrintSummary(Summary):
+	(w,h)= getTerminalSize();
+	lines = Summary.split('\n')
+	#maxlen = len( max(lines, key=len) ) # python 2.5
+	maxlen=0;
+	for l in lines:
+		n=len(l)
+		if '\033' in l: n-=12
+		if n> maxlen:  maxlen=n
+	nCol = w/(maxlen+4);
+	Output = ""
+
+	ListOfBox=[]
+	count=0
+	begin=-1
+	for i in range(0,len(lines)):
+		if '------------------' in lines[i]: count += 1;
+		if count == 1 and begin<0: begin = i
+		if count == 4: 
+			ListOfBox.append( (begin,i) )
+			begin=-1
+			count=0
+	#add empty boxes at the end
+	mod=len(ListOfBox)%nCol
+	for i in range(mod,nCol):
+		ListOfBox.append( (0,-1)  )
+	#take ListOfBox and place them togheter
+	for BoxLine in range(0,len(ListOfBox)/nCol ): 
+		#computed the number of lines to print
+		nL=0
+		for iCol in range(0,nCol):
+			if nL < ListOfBox[iCol+BoxLine][1]- ListOfBox[iCol+BoxLine][0] + 1: nL =  ListOfBox[iCol+BoxLine][1]- ListOfBox[iCol+BoxLine][0] + 1
+		for iLine in range(0,nL):
+		   for iCol in range(0,nCol):
+			Output += " | "
+			current = ListOfBox[iCol+BoxLine][0] + iLine
+			if current > ListOfBox[iCol+BoxLine][1]:  Output += FixedSize("",maxlen)
+			else: 
+				Output +=  FixedSize( lines[ current ],maxlen )
+			#Output += lines[ ListOfBox[iCol+BoxLine][0] + iLine ]
+		   Output += " |\n"
+	print Output
+	return Output
+	
+
 def CrabStatus(dirName):
 	out=subprocess.call("crab -status -c "+dirName+" > /tmp/"+user+"/monitor.status"+suffix,shell=True)
 
@@ -185,11 +275,11 @@ def PrintStatus(Result,dirName=""):
 	if DONE+NOTDONE == 0: NOTDONE=-1
 	
 	line+= "---------------------------\n"
-	line+= "| " +dirName + " |\n"
+	line+= "* " +dirName + " *\n"
 	line+= "---------------------------\n"
-	line+= "\033[01;33mDONE    = %4d     (%.2f%%)\n"%(DONE,float(DONE)/(DONE+NOTDONE)*100)
-	if NOTDONE != 0 :line+= "\033[01;31mNOTDONE = %4d     (%.2f%%)\n"%(NOTDONE,float(NOTDONE)/(DONE+NOTDONE)*100)
-	line+= "\033[0m---------------------------\n"
+	line+= "\033[01;32mDONE    = %4d     (%.2f%%)\033[0m\n"%(DONE,float(DONE)/(DONE+NOTDONE)*100)
+	if NOTDONE != 0: line+= "\033[01;31mNOTDONE = %4d     (%.2f%%)\033[0m\n"%(NOTDONE,float(NOTDONE)/(DONE+NOTDONE)*100)
+	line+= "---------------------------\n"
 	line+="\033[01;34m["
 	tot=25
 	dash=int(tot*float(DONE)/(DONE+NOTDONE) )
@@ -275,6 +365,8 @@ if __name__ == "__main__":
 				ForceReSubmitSubmitted(Results,dir)
 				sys.exit(0)
 		print "\n\n" + Summary + "\n\n"
+		print "\n\n"
+		PrintSummary(Summary)
 		if options.loop : 
 			print "--- GOING TO SLEEP ----"
 			time.sleep(15*60)
